@@ -13,7 +13,7 @@ if not API_KEY:
 def input_handler():
     location = input("Enter location name: ")
     pattern = '.*(\d{4,}).*(\d{4,}).*'
-    pattern_replace = "[^-1234567890]"
+    pattern_replace = "[^. -1234567890]"
     if len(location) > 30 or len(location) <= 2:
         location = "Lviv"
     elif not re.search(pattern, location):
@@ -22,21 +22,20 @@ def input_handler():
     else: 
         location = re.sub(pattern_replace,'',location)
         print(location)
-        strlen = int((len(location)/2))
-        lat = str(location[0 : strlen ])
-        lat = "lat=" + re.sub(r'(\d\d)(\d*)', r'\1.\2', lat)
-        lon = str(location[strlen : ])
-        lon = "&lon=" + re.sub(r'(\d\d)(\d*)', r'\1.\2', lon)
+        location = (re.sub(r'''[,'"!@#$%^&*()_+=|/?>,<`~]''',"", location)).lstrip(" ").rstrip(" ").split(" ")
+        print(location)
+        lat = "lat=" + str(location[0])
+        lon = "&lon=" + str(location[-1])
         location = lat + lon
         print(lat, "\n",lon)
     return location
 
 
 def get_weather(API_KEY):
-    try:
-        location = input_handler()
-        print(location)
-    except: TypeError("Invalid input")
+    #try:
+    location = input_handler()
+    print(location)
+    #except: TypeError("Invalid input")
     url = f"http://api.openweathermap.org/data/2.5/forecast?{location}&units=metric&appid={API_KEY}"
     request = requests.get(url)
     print(request.status_code)
