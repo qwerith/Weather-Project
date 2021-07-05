@@ -1,5 +1,6 @@
-import requests, sys, os, json, datetime, re, dotenv
+import requests, os, json, re
 from dotenv import load_dotenv, find_dotenv
+from datetime import datetime
 # import flask
 # from flask import Flask, url_for
 # from flask import render_template
@@ -51,17 +52,47 @@ def get_coords_or_name(location, request):
     return location
 
 
+def upd_check(file_time):
+    fmt = '%Y-%m-%d %H:%M:%S'
+    current_date = datetime.now().strftime(fmt)
+    current_date = datetime.strptime(current_date, fmt)
+    file_time = datetime.strptime(file_time, fmt)
+    difference = current_date - file_time if current_date > file_time else file_time - current_date
+    dif_in_hours = int((difference.total_seconds()/ 60) / 60)
+    if dif_in_hours >= 12:
+        resault = None
+    else:
+        resault = True
+    print(current_date)
+    print(file_time)
+    print(dif_in_hours)
+    return resault
+
+
 def cache_check(location):
     if input_type_check(location) == "name":
+        location = location[2: ]
         for x in os.listdir(data_path):
             if x.split(" ")[0] == location:
-                coords = re.sub(r'.text','', x.split(" ")[1])
-                cache = Cache(location, coords)
-                cache.read()
-                return True
+                f = json.load(open(data_path + x, "r"))
+                timestamp = f["list"][0]["dt_txt"]
+                if upd_check(timestamp):
+                    coords = re.sub(r'.text','', x.split(" ")[1])
+                    cache = Cache(location, coords)
+                    cache.read()
+                    return True
         return None 
     else:
-        return print("TODO")
+        for x in os.listdir(data_path):
+            if re.sub(r'.text','', x.split(" ")[1]) == location:
+                f = json.load(open(data_path + x, "r"))
+                timestamp = f["list"][0]["dt_txt"]
+                if upd_check(timestamp):
+                    location_name = x.split(" ")[0]
+                    cache = Cache(location_name, location)
+                    cache.read()
+                    return True
+        return None 
 
 
 def get_weather(API_KEY):
@@ -69,7 +100,7 @@ def get_weather(API_KEY):
     location_input = get_input()
     print(location_input)
     #except: TypeError("Invalid input")
-    if cache_check(location_input[2: ]) == None:
+    if cache_check(location_input) == None:
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?{location_input}&units=metric&appid={API_KEY}")
         print(request.status_code)
         if request.status_code != 200:
@@ -113,4 +144,3 @@ class Cache():
 
 
 resault = get_weather(API_KEY)
-print(resault)
