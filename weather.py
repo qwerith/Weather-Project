@@ -1,10 +1,12 @@
-import requests, sys, os, json, datetime, re
+import requests, sys, os, json, datetime, re, dotenv
+from dotenv import load_dotenv, find_dotenv
 # import flask
 # from flask import Flask, url_for
 # from flask import render_template
 
 data_path = os.path.join("C:", os.sep, "Users", "Yura", "Documents", "weather project", "data","")
-API_KEY = os.getenv("WEATHER_KEY")
+load_dotenv(find_dotenv())
+API_KEY = os.getenv("OWM_KEY")
 if not API_KEY:
     raise RuntimeError("API key error")
 
