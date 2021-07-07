@@ -14,10 +14,7 @@ if not API_KEY:
 
 def input_type_check(location):
     pattern = '.*(\d{2,}).*(\d{2,}).*'
-    if not re.search(pattern, location):
-        return "name"
-    else:
-        return "coords"
+    return "name" if not re.search(pattern, location) else "coords"
 
 
 def string_handler(location):
@@ -35,11 +32,7 @@ def string_handler(location):
 
 def get_input():
     location = input("Enter location name: ")
-    if len(location) > 30 or len(location) <= 2:
-        location = "q=Lviv"
-    else:
-        location = string_handler(location)
-    return location
+    return "q=Lviv" if len(location) > 30 or len(location) <= 2 else string_handler(location)
 
 
 def get_coords_or_name(location, request):
@@ -59,14 +52,11 @@ def upd_check(file_time):
     file_time = datetime.strptime(file_time, fmt)
     difference = current_date - file_time if current_date > file_time else file_time - current_date
     dif_in_hours = int((difference.total_seconds()/ 60) / 60)
-    if dif_in_hours >= 12:
-        resault = None
-    else:
-        resault = True
     print(current_date)
     print(file_time)
     print(dif_in_hours)
-    return resault
+    return None if dif_in_hours >= 12  else True
+    
 
 
 def cache_check(location):
@@ -81,6 +71,8 @@ def cache_check(location):
                     cache = Cache(location, coords)
                     cache.read()
                     return True
+                else:
+                    return None
         return None 
     else:
         for x in os.listdir(data_path):
@@ -92,6 +84,8 @@ def cache_check(location):
                     cache = Cache(location_name, location)
                     cache.read()
                     return True
+                else:
+                    return None
         return None 
 
 
