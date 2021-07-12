@@ -8,12 +8,7 @@ from datetime import datetime
 load_dotenv(find_dotenv())
 con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"))
 cur = con.cursor()
-#cur.execute("SELECT id,username,email FROM users LIMIT 5")
-#rows = cur.fetchall()
-#cur.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)", ("Yurii","yurii@gmail.com","qwerty"))
-#for r in rows:
-    #print(f"id {r[0]} |username {r[1]} |email {r[2]}")
-#con.commit()
+
 
 data_path = os.path.join("C:", os.sep, "Users", "Yura", "Documents", "weather project", "data","")
 API_KEY = os.getenv("OWM_KEY")
@@ -58,37 +53,37 @@ def get_coords_or_name(location, request):
     return location
 
 
-def upd_check(file_time):
-    fmt = '%Y-%m-%d %H:%M:%S'
-    current_date = datetime.now().strftime(fmt)
-    current_date = datetime.strptime(current_date, fmt)
-    file_time = file_time[0][0]
-    difference = current_date - file_time if current_date > file_time else file_time - current_date
-    dif_in_hours = int((difference.total_seconds()/ 60) / 60)
-    print(current_date)
-    print(file_time)
-    print(dif_in_hours)
-    return None if dif_in_hours >= 12 else True
+class Cache_check:
 
+    def upd_check(file_time):
+        fmt = '%Y-%m-%d %H:%M:%S'
+        current_date = datetime.now().strftime(fmt)
+        current_date = datetime.strptime(current_date, fmt)
+        difference = current_date - file_time if current_date > file_time else file_time - current_date
+        dif_in_hours = int((difference.total_seconds()/ 60) / 60)
+        print(current_date)
+        print(file_time)
+        print(dif_in_hours)
+        return None if dif_in_hours >= 12 else True
 
-def cache_check(location):
-    if input_type_check(location) == "name":
-        location = location[2: ]
-        query = "SELECT request_date FROM location WHERE location_name = %s"
-        parameters = (location,)
-    else:
-        query = "SELECT request_date FROM location WHERE lon = %s AND lat = %s"
-        lon = location.split("&")[0].split("=")[1]
-        lat = location.split("&")[1].split("=")[1]
-        parameters = (lon,lat)
-    try:
-        cur.execute(query,parameters)
-        timestamp = cur.fetchall()
-        con.commit()
-        if upd_check(timestamp):
-            return (True, )
-        return (None, "outdated")
-    except: return (None, "not_exists")
+    def cache_check(location):
+        if input_type_check(location) == "name":
+            location = location[2: ]
+            query = "SELECT request_date, id FROM location WHERE location_name = %s"
+            parameters = (location,)
+        else:
+            query = "SELECT request_date, id FROM location WHERE lon = %s AND lat = %s"
+            lon = location.split("&")[0].split("=")[1]
+            lat = location.split("&")[1].split("=")[1]
+            parameters = (lon,lat)
+        try:
+            cur.execute(query,parameters)
+            timestamp_id = cur.fetchall()
+            con.commit()
+            if Cache_check.upd_check(timestamp_id[0][0]):
+                return (True,"",timestamp_id[0][1])
+            return (None, "outdated")
+        except: return (None, "not_exists")
     
 
 def get_weather(API_KEY):
@@ -96,35 +91,28 @@ def get_weather(API_KEY):
         location_input = get_input()
         print(location_input)
     except: TypeError("Invalid input")
-    check = cache_check(location_input) 
+    check = Cache_check.cache_check(location_input) 
     if check[0] == None:
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?{location_input}&units=metric&appid={API_KEY}")
         print(request.status_code)
         if request.status_code != 200:
             raise RuntimeError("Request failed", request.status_code)
         else:
-            request = request.json()
             con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"))
             cur = con.cursor()
-            cache = Cache()
             if check[1] == "not_exists":
-                cache.create(request, location_input)
-            cache.write(request)
-            #cache.read()
+                Cache.write_location(request.json(), location_input)
+            Cache.write_weather(request.json(), check[1])
+            Cache.read(request.json()["city"]["id"])
             cur.close()
             con.close()
     else:
-        print("TODO")
-        cache = Cache()
-        #cache.read()
-        
+        Cache.read(check[2])
 
+        
 class Cache():
 
-    def __init__(self):
-        print()
-
-    def create(self, request_data, location_input):
+    def write_location(request_data, location_input):
         if input_type_check(location_input) == "coords":
             location_name = get_coords_or_name(location_input, request_data)
             coords = location_input
@@ -137,7 +125,7 @@ class Cache():
         (db_location[0], db_location[1], db_location[2], db_location[3], db_location[4]))
         con.commit()
 
-    def parse_response(self, request_data):
+    def parse_response(request_data):
         db_weather = []
         paremeters = [["dt"], ["main","temp_min"], ["main","temp_max"],["main","humidity"],
         ["weather", 0,"description"], ["wind", "deg"], ["weather", 0, "icon"], ["wind", "speed"]]
@@ -154,15 +142,13 @@ class Cache():
             db_weather.append(temp_list)
         return db_weather
 
-    def write(self, request_data):
+    def write_weather(request_data, status):
         count = 0
         command = """INSERT INTO weather (date, min_temp, max_temp, humidity, conditions, wind, picture_name, location_id, wind_speed) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         location_id = request_data["city"]["id"]
-        db_weather = self.parse_response(request_data)
-        exists = cur.execute("SELECT EXISTS(SELECT 1 FROM weather WHERE location_id = %s LIMIT 1)",(location_id,))
-        cur.fetchall()
-        print(exists)
-        if exists == True:
+        db_weather = Cache.parse_response(request_data)
+        #exists = cur.execute("SELECT EXISTS(SELECT 1 FROM weather WHERE location_id = %s LIMIT 1)",(location_id,))
+        if status == "outdated":
             cur.execute("DELETE FROM weather WHERE location_id=%s",(location_id,))
             cur.execute(f"UPDATE location SET request_date = %s WHERE id = {location_id}", [(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))])
         for i in db_weather:
@@ -171,9 +157,27 @@ class Cache():
             count += 1
         con.commit()
     
-    def read(self):
-        dev_file = json.load((open(data_path + self.location_name + " " + self.coords + ".text", "r")))
-        #print(json.dumps(dev_file, indent = 4, sort_keys=True))
+    def read(id):
+        cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions, picture_name, wind, wind_speed
+        FROM weather WHERE location_id=%s ORDER BY date""", (id,))
+        query_resault = cur.fetchall()
+        con.commit()
+        cur.close()
+        con.close()  
+        keys = ["", "min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed"]
+        weather_dict = {}
+        for i in query_resault:
+            count = 0
+            temp_dict = {}
+            date = i[0].strftime('%Y-%m-%d %H:%M:%S')
+            for char in i:
+                if type(char) == str:
+                    char = char.replace(" ","")
+                if char != i[0]:
+                    temp_dict.update({keys[count]:char})
+                count += 1 
+            weather_dict.update({date:temp_dict})       
+        print(weather_dict)
         
 
 resault = get_weather(API_KEY)
