@@ -1,33 +1,33 @@
 import requests, os, json, re, psycopg2
 from dotenv import load_dotenv, find_dotenv
 from datetime import datetime
+from cache_check import cache_check, input_type_check
 # import flask
 # from flask import Flask, url_for
 # from flask import render_template
 
-load_dotenv(find_dotenv())
-con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"))
-cur = con.cursor()
+#loading environment variables
+try:
+    load_dotenv(find_dotenv())
+    con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"))
+    cur = con.cursor()
+except: raise RuntimeError("Database credentials error")
 
-
-data_path = os.path.join("C:", os.sep, "Users", "Yura", "Documents", "weather project", "data","")
 API_KEY = os.getenv("OWM_KEY")
 if not API_KEY:
     raise RuntimeError("API key error")
 
 
-def input_type_check(location):
-    pattern = '.*(\d{2,}).*(\d{2,}).*'
-    return "name" if not re.search(pattern, location) else "coords"
-
-
-def string_handler(location):
+#converts input value to request string
+def convert_location_to_query(location):
+    #if input is coordinates, regex uses "pattern_replace" variable to strips all characters not noted in "[^. -1234567890]"
     pattern_replace = "[^. -1234567890]"
     if input_type_check(location) == "name":
         location = "q=" + location
     else:
         location = re.sub(pattern_replace,'',location)
-        location = (re.sub(r'''[,'"!@#$%^&*()_+=|/?>,<`~]''',"", location)).lstrip(" ").rstrip(" ").split(" ")
+        #divides coordinates string into two parts (latitude and longitude) and strips them from all characters noted in "[,'"!@#$%^&*()_+=|/?>,<`~]"
+        location = (re.sub(r'''[,'"!@#$%^&*()_+=|/?>,<`~]''',"", location)).strip(" ").split(" ")
         lat = "lat=" + str(location[0])
         lon = "&lon=" + str(location[-1])
         location = lat + lon
@@ -39,59 +39,31 @@ def get_input():
     if len(location) > 30 or len(location) <= 2:
         location = "q=Lviv"
     else:
-        location = string_handler(location)
+         location = convert_location_to_query(location)
     return location
 
 
+#checks whether input is location name or location coordinates
+#returns coordinates or location name depending on input
 def get_coords_or_name(location, request):
+    #uses "pattern" to define whether input coincides with coordinates, example: """chars(49.3580)chars(23.5123)chars"""
     pattern = '.*(\d{2,}).*(\d{2,}).*'
     if re.search(pattern, location):
         location = request["city"]["name"]
     else:
         location = str(request["city"]["coord"])
-        location = string_handler(location)
+        location = convert_location_to_query(location)
     return location
-
-
-class Cache_check:
-
-    def upd_check(file_time):
-        fmt = '%Y-%m-%d %H:%M:%S'
-        current_date = datetime.now().strftime(fmt)
-        current_date = datetime.strptime(current_date, fmt)
-        difference = current_date - file_time if current_date > file_time else file_time - current_date
-        dif_in_hours = int((difference.total_seconds()/ 60) / 60)
-        print(current_date)
-        print(file_time)
-        print(dif_in_hours)
-        return None if dif_in_hours >= 12 else True
-
-    def cache_check(location):
-        if input_type_check(location) == "name":
-            location = location[2: ]
-            query = "SELECT request_date, id FROM location WHERE location_name = %s"
-            parameters = (location,)
-        else:
-            query = "SELECT request_date, id FROM location WHERE lon = %s AND lat = %s"
-            lon = location.split("&")[0].split("=")[1]
-            lat = location.split("&")[1].split("=")[1]
-            parameters = (lon,lat)
-        try:
-            cur.execute(query,parameters)
-            timestamp_id = cur.fetchall()
-            con.commit()
-            if Cache_check.upd_check(timestamp_id[0][0]):
-                return (True,"",timestamp_id[0][1])
-            return (None, "outdated")
-        except: return (None, "not_exists")
     
 
+#makes request to Open Weather Map API if no cached data is found or it is outdated
 def get_weather(API_KEY):
     try:
         location_input = get_input()
         print(location_input)
     except: TypeError("Invalid input")
-    check = Cache_check.cache_check(location_input) 
+    check = cache_check(location_input) 
+    print(check)
     if check[0] == None:
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?{location_input}&units=metric&appid={API_KEY}")
         print(request.status_code)
@@ -109,9 +81,11 @@ def get_weather(API_KEY):
     else:
         Cache.read(check[2])
 
-        
+
+#manages cache in postgres database
 class Cache():
 
+    #inserts rows in "location" table if particular location is not found by "cache_check()" function
     def write_location(request_data, location_input):
         if input_type_check(location_input) == "coords":
             location_name = get_coords_or_name(location_input, request_data)
@@ -125,6 +99,7 @@ class Cache():
         (db_location[0], db_location[1], db_location[2], db_location[3], db_location[4]))
         con.commit()
 
+    #parses data in particular order for further insertion into "weather" table
     def parse_response(request_data):
         db_weather = []
         paremeters = [["dt"], ["main","temp_min"], ["main","temp_max"],["main","humidity"],
@@ -142,6 +117,8 @@ class Cache():
             db_weather.append(temp_list)
         return db_weather
 
+    #inserts data into "weather table" if it is found to be absent or outdated by "cache_check()"" function
+    #updates "reques_date" row in "location" table if weather data is outdated
     def write_weather(request_data, status):
         count = 0
         command = """INSERT INTO weather (date, min_temp, max_temp, humidity, conditions, wind, picture_name, location_id, wind_speed) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
@@ -157,16 +134,17 @@ class Cache():
             count += 1
         con.commit()
     
+    #queries "location" and "weather" tables for data, organises, prints and returns dictionary
     def read(id):
         cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions, picture_name, wind, wind_speed
         FROM weather WHERE location_id=%s ORDER BY date""", (id,))
-        query_resault = cur.fetchall()
+        query_result = cur.fetchall()
         con.commit()
         cur.close()
         con.close()  
         keys = ["", "min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed"]
         weather_dict = {}
-        for i in query_resault:
+        for i in query_result:
             count = 0
             temp_dict = {}
             date = i[0].strftime('%Y-%m-%d %H:%M:%S')
@@ -178,6 +156,7 @@ class Cache():
                 count += 1 
             weather_dict.update({date:temp_dict})       
         print(weather_dict)
+        return weather_dict
         
 
-resault = get_weather(API_KEY)
+result = get_weather(API_KEY)
