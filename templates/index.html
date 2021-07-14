@@ -4,11 +4,47 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/styles.css" rel="stylesheet">
     <title>MyWeatherApp</title>
 </head>
 <body>
     <div>
-        <label>TODO</label>
+        <label class="main_search">TODO</label>
+        <form class="main_search" action="/" method="POST">
+            <input class="search" type="text" name="location"> <button class="btn_submit" type="submit">Find</button>
+        </form>
+        {% if data %}
+        <div class= tbl_wrap>
+            <table class="tbl_main">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>min temp</th>
+                        <th>max temp</th>
+                        <th>humidity</th>
+                        <th>conditions</th>
+                        <th>picture</th>
+                        <th>wind direction</th>
+                        <th>wind_speed</th>
+                    </tr>
+                </thead>
+                    <tbody>
+                    {% for i in data %}
+                    <tr>
+                        <td>{{ i }}</td>
+                        <td>{{ data[i]["min_temp"] }}</td>
+                        <td>{{ data[i]["max_temp"] }}</td>
+                        <td>{{ data[i]["humidity"] }}</td>
+                        <td>{{ data[i]["conditions"] }}</td>
+                        <td>{{ data[i]["picture_name"] }}</td>
+                        <td>{{ data[i]["wind"] }}</td>
+                        <td>{{ data[i]["wind_speed"] }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+            </table>
+        </div>
+        {% endif %}
     </div>
 </body>
 </html>

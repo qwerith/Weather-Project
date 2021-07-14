@@ -2,9 +2,6 @@ import requests, os, json, re, psycopg2
 from dotenv import load_dotenv, find_dotenv
 from datetime import datetime
 from cache_check import cache_check, input_type_check
-# import flask
-# from flask import Flask, url_for
-# from flask import render_template
 
 #loading environment variables
 try:
@@ -34,8 +31,8 @@ def convert_location_to_query(location):
     return location
 
 
-def get_input():
-    location = input("Enter location name: ")
+def get_input(location):
+    #location = input("Enter location name: ")
     if len(location) > 30 or len(location) <= 2:
         location = "q=Lviv"
     else:
@@ -57,29 +54,24 @@ def get_coords_or_name(location, request):
     
 
 #makes request to Open Weather Map API if no cached data is found or it is outdated
-def get_weather(API_KEY):
+def get_weather(location_input):
     try:
-        location_input = get_input()
+        location_input = get_input(location_input)
         print(location_input)
     except: TypeError("Invalid input")
     check = cache_check(location_input) 
-    print(check)
     if check[0] == None:
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?{location_input}&units=metric&appid={API_KEY}")
         print(request.status_code)
         if request.status_code != 200:
             raise RuntimeError("Request failed", request.status_code)
         else:
-            con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"))
-            cur = con.cursor()
             if check[1] == "not_exists":
                 Cache.write_location(request.json(), location_input)
             Cache.write_weather(request.json(), check[1])
-            Cache.read(request.json()["city"]["id"])
-            cur.close()
-            con.close()
+            return Cache.read(request.json()["city"]["id"])
     else:
-        Cache.read(check[2])
+        return Cache.read(check[2])
 
 
 #manages cache in postgres database
@@ -139,9 +131,7 @@ class Cache():
         cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions, picture_name, wind, wind_speed
         FROM weather WHERE location_id=%s ORDER BY date""", (id,))
         query_result = cur.fetchall()
-        con.commit()
-        cur.close()
-        con.close()  
+        con.commit() 
         keys = ["", "min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed"]
         weather_dict = {}
         for i in query_result:
@@ -155,8 +145,10 @@ class Cache():
                     temp_dict.update({keys[count]:char})
                 count += 1 
             weather_dict.update({date:temp_dict})       
-        print(weather_dict)
+        #print(weather_dict)
+        #cur.close()
+        #con.close() 
         return weather_dict
         
+#result = get_weather()
 
-result = get_weather(API_KEY)
