@@ -64,7 +64,7 @@ def get_weather(location_input):
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?{location_input}&units=metric&appid={API_KEY}")
         print(request.status_code)
         if request.status_code != 200:
-            raise RuntimeError("Request failed", request.status_code)
+            return RuntimeError("Request failed", request.status_code)
         else:
             if check[1] == "not_exists":
                 Cache.write_location(request.json(), location_input)
@@ -92,7 +92,7 @@ class Cache():
         con.commit()
 
     #parses data in particular order for further insertion into "weather" table
-    def parse_response(request_data):
+    def parse_api_response(request_data):
         db_weather = []
         paremeters = [["dt"], ["main","temp_min"], ["main","temp_max"],["main","humidity"],
         ["weather", 0,"description"], ["wind", "deg"], ["weather", 0, "icon"], ["wind", "speed"]]
@@ -115,7 +115,7 @@ class Cache():
         count = 0
         command = """INSERT INTO weather (date, min_temp, max_temp, humidity, conditions, wind, picture_name, location_id, wind_speed) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         location_id = request_data["city"]["id"]
-        db_weather = Cache.parse_response(request_data)
+        db_weather = Cache.parse_api_response(request_data)
         #exists = cur.execute("SELECT EXISTS(SELECT 1 FROM weather WHERE location_id = %s LIMIT 1)",(location_id,))
         if status == "outdated":
             cur.execute("DELETE FROM weather WHERE location_id=%s",(location_id,))
@@ -125,30 +125,48 @@ class Cache():
             db_weather[count][3], db_weather[count][4], db_weather[count][5], db_weather[count][6], location_id, db_weather[count][7]))
             count += 1
         con.commit()
-    
-    #queries "location" and "weather" tables for data, organises, prints and returns dictionary
-    def read(id):
-        cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions, picture_name, wind, wind_speed
-        FROM weather WHERE location_id=%s ORDER BY date""", (id,))
-        query_result = cur.fetchall()
-        con.commit() 
+
+    #organises, prints and returns list
+    def parse_database_response(query_result):
         keys = ["", "min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed"]
         weather_dict = {}
+        final_data_list = []
+        group_list = []
         for i in query_result:
             count = 0
             temp_dict = {}
             date = i[0].strftime('%Y-%m-%d %H:%M:%S')
             for char in i:
+                #normalises string data by removing whitespaces
                 if type(char) == str:
                     char = char.replace(" ","")
+                    # i[0] - statr of the tuple (timestamp)
                 if char != i[0]:
                     temp_dict.update({keys[count]:char})
                 count += 1 
-            weather_dict.update({date:temp_dict})       
-        #print(weather_dict)
-        #cur.close()
-        #con.close() 
-        return weather_dict
-        
-#result = get_weather()
+            weather_dict.update({date:temp_dict})
+        #sorts data in groups by comparing first part of timestamp(year, month, day)
+        for i in weather_dict.keys():
+            group_by_date = i
+            break
+        for i in weather_dict.items():
+            iterable_date = i[0]
+            if str(group_by_date).split(" ")[0] == str(iterable_date).split(" ")[0]:
+                group_list.append(i)
+            else:
+                final_data_list.append(group_list)
+                group_list = []
+                group_by_date = str(i[0])
+        return final_data_list
 
+
+    #queries "location" and "weather" tables for data
+    def read(id):
+        cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions, picture_name, wind, wind_speed
+        FROM weather WHERE location_id=%s ORDER BY date""", (id,))
+        query_result = cur.fetchall()
+        con.commit()
+        return Cache.parse_database_response(query_result)
+        
+#result = get_weather("Drohobych")
+#print(result)
