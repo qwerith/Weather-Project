@@ -1,0 +1,26 @@
+version: '3.1'
+
+services:
+
+    postgres_db:
+        image: postgres
+        restart: always 
+        volumes: 
+            - postgres-data:/var/lib/postgresql/data 
+        environment:
+            POSTGRES_PASSWORD: test
+        ports:
+            - 5432:5432
+
+    pgadmin:
+        image: dpage/pgadmin4 
+        restart: always
+        environment:
+            PGADMIN_DEFAULT_EMAIL: test@gmail.com
+            PGADMIN_DEFAULT_PASSWORD: test
+        ports:
+            - 5555:80
+
+volumes:
+    postgres-data:
+        driver: local

@@ -2,7 +2,8 @@ import requests, os, json, re, psycopg2
 from dotenv import load_dotenv, find_dotenv
 from datetime import datetime
 from cache_check import cache_check, input_type_check
-
+from enum import Enum
+    
 #loading environment variables
 try:
     load_dotenv(find_dotenv())
@@ -13,6 +14,12 @@ except: raise RuntimeError("Database credentials error")
 API_KEY = os.getenv("OWM_KEY")
 if not API_KEY:
     raise RuntimeError("API key error")
+
+
+class Parse_var(Enum):
+    API_RES_PARAMS = [["dt"], ["main","temp_min"], ["main","temp_max"],["main","humidity"],
+        ["weather", 0,"description"], ["wind", "deg"], ["weather", 0, "icon"], ["wind", "speed"]]
+    DB_RES_KEYS = ["", "min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed"]
 
 
 #converts input value to request string
@@ -94,11 +101,10 @@ class Cache():
     #parses data in particular order for further insertion into "weather" table
     def parse_api_response(request_data):
         db_weather = []
-        paremeters = [["dt"], ["main","temp_min"], ["main","temp_max"],["main","humidity"],
-        ["weather", 0,"description"], ["wind", "deg"], ["weather", 0, "icon"], ["wind", "speed"]]
+        parameters = Parse_var.API_RES_PARAMS.value
         for i in request_data["list"]:
             temp_list = []
-            for p in paremeters:
+            for p in parameters:
                 length = len(p)
                 if length == 2:
                     temp_list.append(i[p[0]][p[1]]) 
@@ -128,7 +134,7 @@ class Cache():
 
     #organises, prints and returns list
     def parse_database_response(query_result):
-        keys = ["", "min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed"]
+        keys = Parse_var.DB_RES_KEYS.value
         weather_dict = {}
         final_data_list = []
         group_list = []

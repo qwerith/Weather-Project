@@ -1,0 +1,44 @@
+CREATE TABLE location (
+id serial PRIMARY KEY,
+location_name char(50),
+lat char(50),
+lon char(50),
+request_date timestamp without time zone);
+
+
+CREATE TABLE weather (
+id serial PRIMARY KEY,
+date timestamp without time zone,
+min_temp char(50),
+max_temp char(50),
+humidity char(50),
+conditions char(50),
+wind char(50),
+picture_name char(50),
+location_id INT
+  REFERENCES location(id),
+wind_speed char(50));
+
+
+CREATE TABLE mailing (
+user_id INT,
+	FOREIGN KEY (user_id)
+        REFERENCES users(id),
+location_id INT,
+	FOREIGN KEY (location_id)
+		REFERENCES location(id),
+weather_id INT,
+	FOREIGN KEY (weather_id)
+		REFERENCES weather(id));
+
+
+CREATE TABLE mailing (
+user_id INT,
+	FOREIGN KEY (user_id)
+        REFERENCES users(id),
+location_id INT,
+	FOREIGN KEY (location_id)
+		REFERENCES location(id),
+weather_id INT,
+	FOREIGN KEY (weather_id)
+		REFERENCES weather(id));
