@@ -20,16 +20,12 @@ location_id INT
 wind_speed char(50));
 
 
-CREATE TABLE mailing (
-user_id INT,
-	FOREIGN KEY (user_id)
-        REFERENCES users(id),
-location_id INT,
-	FOREIGN KEY (location_id)
-		REFERENCES location(id),
-weather_id INT,
-	FOREIGN KEY (weather_id)
-		REFERENCES weather(id));
+CREATE TABLE users (
+id SERIAL PRIMARY KEY,
+username CHAR(50),
+email CHAR(50) UNIQUE,
+password TEXT,
+chosen_location CHAR(50));
 
 
 CREATE TABLE mailing (
@@ -42,3 +38,5 @@ location_id INT,
 weather_id INT,
 	FOREIGN KEY (weather_id)
 		REFERENCES weather(id));
+
+

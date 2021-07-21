@@ -13,6 +13,8 @@
 </head>
 <body>
     <div container>
+        <a href="register">Register</a>
+        <a href="login">Register</a>
         <div class='container-fluid'>
             <label class="main_search">TODO</label>
             <form class="d-flex" action="/" method="POST">
@@ -30,13 +32,13 @@
                 <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">{{ data[0][0][0].split()[0]}}</button>
                 <button class="nav-link"id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">{{ data[1][0][0].split()[0]}}</button>
                 <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">{{ data[2][0][0].split()[0]}}</button>
-                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">{{ data[3][0][0].split()[0]}}</button>
-                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">{{ data[4][0][0].split()[0]}}</button>
+                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact1" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">{{ data[3][0][0].split()[0]}}</button>
+                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact2" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">{{ data[4][0][0].split()[0]}}</button>
                 </div>
             </nav>
         </div>
         <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab"><div class="container-fluid">
+        <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab"><div class="container-fluid">
                 <table class="table">
                     <thead class="table-dark">
                         <tr>
@@ -84,7 +86,7 @@
                         {% for i in data[1] %}
                             <tr>
                                 <td>{{ i[0].split()[1] }}</td>
-                                <td>{{ [1]["min_temp"] }}</td>
+                                <td>{{ i[1]["min_temp"] }}</td>
                                 <td>{{ i[1]["max_temp"] }}</td>
                                 <td>{{ i[1]["humidity"] }}</td>
                                 <td>{{ i[1]["conditions"] }}</td>
@@ -95,7 +97,8 @@
                         {% endfor %}
                     </tbody>
                   </table>
-            </div></div>
+                </div>
+            </div>
             <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab"><div class="container-fluid">
                 <table class="table">
                     <thead class="table-dark">
@@ -125,7 +128,8 @@
                         {% endfor %}
                     </tbody>
                   </table>
-            </div></div>
+                </div>
+            </div>
             <div class="tab-pane fade" id="nav-contact1" role="tabpanel" aria-labelledby="nav-contact-tab"><div class="container-fluid">
                 <table class="table">
                     <thead class="table-dark">
@@ -155,7 +159,8 @@
                         {% endfor %}
                     </tbody>
                   </table>
-            </div></div>
+                </div>
+            </div>
             <div class="tab-pane fade" id="nav-contact2" role="tabpanel" aria-labelledby="nav-contact-tab"><div class="container-fluid">
                 <table class="table">
                     <thead class="table-dark">
@@ -185,7 +190,8 @@
                         {% endfor %}
                     </tbody>
                   </table>
-            </div></div>
+                </div>
+            </div>
         </div>
     </div>
         {% endif %}

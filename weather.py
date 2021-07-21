@@ -7,7 +7,7 @@ from enum import Enum
 #loading environment variables
 try:
     load_dotenv(find_dotenv())
-    con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"))
+    con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"), port = 5431)
     cur = con.cursor()
 except: raise RuntimeError("Database credentials error")
 
@@ -174,5 +174,5 @@ class Cache():
         con.commit()
         return Cache.parse_database_response(query_result)
         
-#result = get_weather("Drohobych")
-#print(result)
+result = get_weather("Drohobych")
+print(result)

@@ -8,16 +8,16 @@ services:
         volumes: 
             - postgres-data:/var/lib/postgresql/data 
         environment:
-            POSTGRES_PASSWORD: test
+            POSTGRES_PASSWORD: weatherapp
         ports:
-            - 5432:5432
+            - 5431:5432
 
     pgadmin:
         image: dpage/pgadmin4 
         restart: always
         environment:
-            PGADMIN_DEFAULT_EMAIL: test@gmail.com
-            PGADMIN_DEFAULT_PASSWORD: test
+            PGADMIN_DEFAULT_EMAIL: yuriisorokin98@gmail.com
+            PGADMIN_DEFAULT_PASSWORD: weatherapp
         ports:
             - 5555:80
 
