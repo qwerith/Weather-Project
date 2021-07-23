@@ -1,7 +1,7 @@
 import os
 from flask import Flask, redirect, request, session, render_template, flash, url_for
 from weather import get_weather
-from accounts import Accounts, input_validation
+from accounts import Accounts, input_validation, login_required
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv, find_dotenv
 
@@ -17,11 +17,13 @@ bcrypt = Bcrypt(app)
 
 
 @app.route('/', methods=["GET", "POST"])
+#@login_required
 def index():
     if request.method == "POST" and request.form.get("location"):
         print(request.form.get("location"))
         location = request.form.get("location")
         DATA = get_weather(location)
+        print(DATA)
         STATUS = f"{location} not found"
         return render_template('index.html', status=STATUS) if type(DATA) == RuntimeError else render_template("index.html", data=DATA) 
     else:
@@ -33,12 +35,11 @@ def register():
     form = [request.form.get("username"), request.form.get("email"), request.form.get("password"), request.form.get("confirm_password")]
     if request.method == "POST" and all(char != "" for char in form):
         input_valid = input_validation(form[1:4])
-        if not input_valid == "":
-            form.clear()
+        form.clear()
+        if not input_valid == "":     
             flash(input_valid)
             return render_template("register.html")
         else:
-            form.clear()
             user = Accounts(request.form.get("email"), request.form.get("password"))
             flash(user.register(request.form.get("username")))
             return redirect(url_for("login"))

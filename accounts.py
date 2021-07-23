@@ -1,6 +1,7 @@
 import psycopg2, os, re
 from dotenv import load_dotenv, find_dotenv
 from flask_bcrypt import Bcrypt
+from flask import redirect, session
 bcrypt = Bcrypt()
 
 #loading environment variables
@@ -17,7 +18,7 @@ class Accounts():
         self.password = password.strip(" ")
 
     def register(self, username):
-        if cur.execute("SELECT EXISTS(SELECT 1 FROM users WHERE email=%s LIMIT 1", (self.email, )):
+        if cur.execute("SELECT EXISTS(SELECT 1 FROM users WHERE email=%s LIMIT 1)", (self.email, )):
             return "Account already exists"  
         else:
             try:
@@ -48,3 +49,16 @@ def input_validation(user_input):
         if not user_input[1] == user_input[2]:
             response += "Passwords do not match"
     return response
+
+
+def login_required(func):
+    def wrapper(*args, **kwargs):
+        if session.get("user_id") != None:
+            func(*args, **kwargs)
+            print("test1")
+            return func(*args, **kwargs)
+        else:
+            print("test")
+            return redirect("/login")
+    return wrapper
+

@@ -19,7 +19,7 @@ def input_type_check(location):
 #if "request_date" older then 12 hours(roughly), returns None(means outdated)
 def upd_check(file_time):
     fmt = '%Y-%m-%d %H:%M:%S'
-    current_date = datetime.now().strftime(fmt)
+    current_date = datetime.utcnow().strftime(fmt)
     current_date = datetime.strptime(current_date, fmt)
     difference = current_date - file_time if current_date > file_time else file_time - current_date
     dif_in_hours = int((difference.total_seconds()/ 60) / 60)

@@ -19,7 +19,8 @@ if not API_KEY:
 class Parse_var(Enum):
     API_RES_PARAMS = [["dt"], ["main","temp_min"], ["main","temp_max"],["main","humidity"],
         ["weather", 0,"description"], ["wind", "deg"], ["weather", 0, "icon"], ["wind", "speed"]]
-    DB_RES_KEYS = ["", "min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed"]
+    # "" Not used, added to list because it needs to have length of 8
+    DB_RES_KEYS = ["min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed", ""]
 
 
 #converts input value to request string
@@ -70,6 +71,8 @@ def get_weather(location_input):
     if check[0] == None:
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?{location_input}&units=metric&appid={API_KEY}")
         print(request.status_code)
+        parsed = request.json()
+        print(json.dumps(parsed, indent=4, sort_keys=True))
         if request.status_code != 200:
             return RuntimeError("Request failed", request.status_code)
         else:
@@ -107,12 +110,13 @@ class Cache():
             for p in parameters:
                 length = len(p)
                 if length == 2:
-                    temp_list.append(i[p[0]][p[1]]) 
+                    temp_list.append(i[p[0]][p[1]])
                 elif length == 3:
                     temp_list.append(i[p[0]][p[1]][p[2]]) 
                 else:
-                    temp_list.append(i[p[0]]) 
+                    temp_list.append(i[p[0]])
             db_weather.append(temp_list)
+        print(db_weather)
         return db_weather
 
     #inserts data into "weather table" if it is found to be absent or outdated by "cache_check()"" function
@@ -129,7 +133,7 @@ class Cache():
         for i in db_weather:
             cur.execute(command,(datetime.fromtimestamp(db_weather[count][0]), db_weather[count][1], db_weather[count][2],
             db_weather[count][3], db_weather[count][4], db_weather[count][5], db_weather[count][6], location_id, db_weather[count][7]))
-            count += 1
+            count += 1  
         con.commit()
 
     #organises, prints and returns list
@@ -142,13 +146,12 @@ class Cache():
             count = 0
             temp_dict = {}
             date = i[0].strftime('%Y-%m-%d %H:%M:%S')
-            for char in i:
+            for char in i[1:]:
                 #normalises string data by removing whitespaces
-                if type(char) == str:
-                    char = char.replace(" ","")
-                    # i[0] - statr of the tuple (timestamp)
-                if char != i[0]:
-                    temp_dict.update({keys[count]:char})
+                char = char.replace(" ","")
+                if "."  in char:
+                    char = round(float(char))
+                temp_dict.update({keys[count]:char})
                 count += 1 
             weather_dict.update({date:temp_dict})
         #sorts data in groups by comparing first part of timestamp(year, month, day)
@@ -162,9 +165,9 @@ class Cache():
             else:
                 final_data_list.append(group_list)
                 group_list = []
+                group_list.append(i)
                 group_by_date = str(i[0])
         return final_data_list
-
 
     #queries "location" and "weather" tables for data
     def read(id):
@@ -174,5 +177,5 @@ class Cache():
         con.commit()
         return Cache.parse_database_response(query_result)
         
-result = get_weather("Drohobych")
-print(result)
+result = get_weather("Lutsk")
+#print(result)

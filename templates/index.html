@@ -13,8 +13,10 @@
 </head>
 <body>
     <div container>
-        <a href="register">Register</a>
-        <a href="login">Register</a>
+        <div class="links">
+            <a href="register">Register</a>
+            <a href="login">Login</a>
+        </div>
         <div class='container-fluid'>
             <label class="main_search">TODO</label>
             <form class="d-flex" action="/" method="POST">
@@ -43,8 +45,8 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Date</th>
-                            <th>min temp</th>
-                            <th>max temp</th>
+                            <th>min temp °C</th>
+                            <th>max temp °C</th>
                             <th>humidity</th>
                             <th>conditions</th>
                             <th>picture</th>
@@ -56,8 +58,8 @@
                         {% for i in data[0] %}
                             <tr>
                                 <td>{{ i[0].split()[1]}}</td>
-                                <td>{{ i[1]["min_temp"] }}</td>
-                                <td>{{ i[1]["max_temp"] }}</td>
+                                <td>{{ i[1]["min_temp"] }}°</td>
+                                <td>{{ i[1]["max_temp"] }}°</td>
                                 <td>{{ i[1]["humidity"] }}</td>
                                 <td>{{ i[1]["conditions"] }}</td>
                                 <td>{{ i[1]["picture_name"] }}</td>
@@ -73,8 +75,8 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Date</th>
-                            <th>min temp</th>
-                            <th>max temp</th>
+                            <th>min temp°C</th>
+                            <th>max temp°C</th>
                             <th>humidity</th>
                             <th>conditions</th>
                             <th>picture</th>
@@ -86,8 +88,8 @@
                         {% for i in data[1] %}
                             <tr>
                                 <td>{{ i[0].split()[1] }}</td>
-                                <td>{{ i[1]["min_temp"] }}</td>
-                                <td>{{ i[1]["max_temp"] }}</td>
+                                <td>{{ i[1]["min_temp"] }}°</td>
+                                <td>{{ i[1]["max_temp"] }}°</td>
                                 <td>{{ i[1]["humidity"] }}</td>
                                 <td>{{ i[1]["conditions"] }}</td>
                                 <td>{{ i[1]["picture_name"] }}</td>
@@ -104,8 +106,8 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Date</th>
-                            <th>min temp</th>
-                            <th>max temp</th>
+                            <th>min temp°C</th>
+                            <th>max temp°C</th>
                             <th>humidity</th>
                             <th>conditions</th>
                             <th>picture</th>
@@ -117,8 +119,8 @@
                         {% for i in data[2] %}
                             <tr>
                                 <td>{{ i[0].split()[1] }}</td>
-                                <td>{{ i[1]["min_temp"] }}</td>
-                                <td>{{ i[1]["max_temp"] }}</td>
+                                <td>{{ i[1]["min_temp"] }}°</td>
+                                <td>{{ i[1]["max_temp"] }}°</td>
                                 <td>{{ i[1]["humidity"] }}</td>
                                 <td>{{ i[1]["conditions"] }}</td>
                                 <td>{{ i[1]["picture_name"] }}</td>
@@ -135,8 +137,8 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Date</th>
-                            <th>min temp</th>
-                            <th>max temp</th>
+                            <th>min temp°C</th>
+                            <th>max temp°C</th>
                             <th>humidity</th>
                             <th>conditions</th>
                             <th>picture</th>
@@ -148,8 +150,8 @@
                         {% for i in data[3] %}
                             <tr>
                                 <td>{{ i[0].split()[1] }}</td>
-                                <td>{{ i[1]["min_temp"] }}</td>
-                                <td>{{ i[1]["max_temp"] }}</td>
+                                <td>{{ i[1]["min_temp"] }}°</td>
+                                <td>{{ i[1]["max_temp"] }}°</td>
                                 <td>{{ i[1]["humidity"] }}</td>
                                 <td>{{ i[1]["conditions"] }}</td>
                                 <td>{{ i[1]["picture_name"] }}</td>
@@ -166,8 +168,8 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Date</th>
-                            <th>min temp</th>
-                            <th>max temp</th>
+                            <th>min temp°C</th>
+                            <th>max temp°C</th>
                             <th>humidity</th>
                             <th>conditions</th>
                             <th>picture</th>
@@ -179,8 +181,8 @@
                         {% for i in data[4] %}
                             <tr>
                                 <td>{{ i[0].split()[1] }}</td>
-                                <td>{{ i[1]["min_temp"] }}</td>
-                                <td>{{ i[1]["max_temp"] }}</td>
+                                <td>{{ i[1]["min_temp"] }}°</td>
+                                <td>{{ i[1]["max_temp"] }}°</td>
                                 <td>{{ i[1]["humidity"] }}</td>
                                 <td>{{ i[1]["conditions"] }}</td>
                                 <td>{{ i[1]["picture_name"] }}</td>
