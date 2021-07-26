@@ -39,15 +39,15 @@ class Accounts():
 
 def input_validation(user_input):
     #regex form for email validation
-    response = ""
+    response = []
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     if not (re.match(email_pattern, user_input[0])):
-        response = "Invalid email"
+        response.append("Invalid email")
     if not len(user_input[1]) >= 5 and len(user_input[1]) <= 10:
-        response += "\nPassword must be 5 to 10 characters long"  
+        response.append("\nPassword must be 5 to 10 characters long")  
     if len(user_input) == 3:
         if not user_input[1] == user_input[2]:
-            response += "Passwords do not match"
+            response.append("Passwords do not match")
     return response
 
 
@@ -55,10 +55,7 @@ def login_required(func):
     def wrapper(*args, **kwargs):
         if session.get("user_id") != None:
             func(*args, **kwargs)
-            print("test1")
             return func(*args, **kwargs)
-        else:
-            print("test")
-            return redirect("/login")
+        return redirect("/login")
     return wrapper
 

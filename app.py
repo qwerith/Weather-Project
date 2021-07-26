@@ -36,12 +36,12 @@ def register():
     if request.method == "POST" and all(char != "" for char in form):
         input_valid = input_validation(form[1:4])
         form.clear()
-        if not input_valid == "":     
-            flash(input_valid)
+        if not input_valid == []:     
+            flash(input_valid, "info")
             return render_template("register.html")
         else:
             user = Accounts(request.form.get("email"), request.form.get("password"))
-            flash(user.register(request.form.get("username")))
+            flash(user.register(request.form.get("username")), "info")
             return redirect(url_for("login"))
     else:
         form.clear()
@@ -53,21 +53,29 @@ def login():
     if request.method == "POST" and request.form.get("email") != "" and request.form.get("password") != "":
         session.pop("user_id", None)
         input_valid = input_validation([request.form.get("email"), request.form.get("password")])
-        if not input_valid == "":
-            flash(input_valid)
+        if input_valid != []:
+            flash(input_valid, "info")
             return render_template("login.html") 
         else:
             user = Accounts(request.form.get("email"), request.form.get("password"))
             user = user.login()
             if user:
                 session["user_id"] = user[1][0][0]
+                session["username"] = user[1][0][2]
                 print(session["user_id"])
                 return redirect("/")
             else:
-                flash("An error occured")
+                flash("An error occured", "info")
                 return render_template("login.html")        
     else:
         return render_template("login.html")
+
+@login_required
+@app.route("/logout", methods=["GET"])
+def logout():
+    session.pop("user_id", None)
+    return redirect("/")
+
 
 if __name__=="__main__":
     app.run()    

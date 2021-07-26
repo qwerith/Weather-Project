@@ -21,7 +21,7 @@ Last change	: 2015/03/27
 /*=== 1. General Structure ===*/
 html,
 body {
-  background: #efefef;
+  background: white;
   padding: 10px;
   font-family: 'Varela Round';
   height: 100%;
@@ -36,12 +36,12 @@ a {
   transition: all ease-in-out 200ms;
 }
 a:hover {
-  color: #333333;
+  color: black;
   text-decoration: none;
 }
 /*=== 3. Text Outside the Box ===*/
 .etc-login-form {
-  color: #919191;
+  color: #555555;
   padding: 10px 20px;
 }
 .etc-login-form p {
@@ -76,7 +76,7 @@ a:hover {
 }
 .login-form-1 .form-group {
   margin-bottom: 0;
-  border-bottom: 2px solid #efefef;
+  border-bottom: 2px solid white;
   padding-right: 20px;
   position: relative;
 }
@@ -84,7 +84,7 @@ a:hover {
   border-bottom: 0;
 }
 .login-group {
-  background: #ffffff;
+  background: #efefef;
   color: #999999;
   border-radius: 8px;
   padding: 10px 20px;
@@ -97,13 +97,13 @@ a:hover {
   position: absolute;
   right: -25px;
   top: 50%;
-  background: #ffffff;
+  background: #efefef;
   color: #999999;
   padding: 11px 0;
   width: 50px;
   height: 50px;
   margin-top: -25px;
-  border: 5px solid #efefef;
+  border: 5px solid white;
   border-radius: 50%;
   transition: all ease-in-out 500ms;
 }
@@ -287,8 +287,20 @@ label:hover:before {
 .logo {
   padding: 15px 0;
   font-size: 25px;
-  color: #aaaaaa;
+  color: #555555;
   font-weight: bold;
+}
+
+.flash {
+  position: relative;
+  height: 50px;
+  width: 50%;
+  bottom: 47%;
+  display: inline;
+  text-align: center;
+  align-items: bottom;
+  color: #555555;
+
 }
 
 
