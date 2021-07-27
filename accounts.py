@@ -27,7 +27,7 @@ class Accounts():
                 return "Your account has been successfully created"
             except: return "Registration failed"    
     
-    def login(self):
+    def user_verification(self):
         cur.execute("SELECT id, username, email, password FROM users WHERE email=%s LIMIT 1", (self.email, ))
         con.commit()
         user = cur.fetchall()
@@ -35,6 +35,13 @@ class Accounts():
             return(True, user)
         else:
             return(None)
+    
+    def delete(self):
+        cur.execute("DELETE FROM users WHERE email=%s", (self.email, ))
+        con.commit()
+
+    def change_password(self, new_password):
+        cur.execute("UPDATE users SET password=%s WHERE email=%s", (bcrypt.generate_password_hash(new_password).decode("utf-8"), self.email))
 
 
 def input_validation(user_input):
@@ -47,6 +54,9 @@ def input_validation(user_input):
         response.append("\nPassword must be 5 to 10 characters long")  
     if len(user_input) == 3:
         if not user_input[1] == user_input[2]:
+            response.append("Passwords do not match")
+    if len(user_input) == 4:
+        if not user_input[2] == user_input[3]:
             response.append("Passwords do not match")
     return response
 

@@ -58,23 +58,56 @@ def login():
             return render_template("login.html") 
         else:
             user = Accounts(request.form.get("email"), request.form.get("password"))
-            user = user.login()
+            user = user.user_verification()
             if user:
                 session["user_id"] = user[1][0][0]
                 session["username"] = user[1][0][2]
                 print(session["user_id"])
                 return redirect("/")
             else:
-                flash("An error occured", "info")
+                flash(["Wrong email or password"], "info")
                 return render_template("login.html")        
     else:
         return render_template("login.html")
+
 
 @login_required
 @app.route("/logout", methods=["GET"])
 def logout():
     session.pop("user_id", None)
     return redirect("/")
+
+
+@login_required
+@app.route("/delete", methods=["GET", "POST"])
+def delete():
+    if request.method == "POST" and request.form.get("password") != "":
+        input_valid = input_validation([session["username"], request.form.get("password")])
+        if input_valid != []:
+            flash(input_valid, "info")
+        user = Accounts(session["username"], request.form.get("password"))
+        if user.user_verification():
+            user.delete()
+            session.pop("user_id", None)
+            return redirect("/")
+        return redirect("/delete")
+    return render_template("delete.html")
+
+
+@login_required
+@app.route("/change_password", methods=["GET", "POST"])
+def change_password():
+    if request.method == "POST" and request.form.get("password") != "":
+        input_valid = input_validation([session["username"], request.form.get("password"),
+        request.form.get("password_new"), request.form.get("password_new_confirm")])
+        if input_valid != []:
+            flash(input_valid, "info")
+        user = Accounts(session["username"], request.form.get("password"))
+        if user.user_verification():
+            user.change_password(request.form.get("password_new"))
+            return redirect("/")
+        return redirect("/change_password")
+    return render_template("change_password.html")
 
 
 if __name__=="__main__":

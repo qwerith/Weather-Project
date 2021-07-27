@@ -23,19 +23,19 @@
 						<div class="login-group">
 							<div class="form-group">
 								<label for="reg_username" class="sr-only">Username</label>
-								<input type="text" class="form-control" id="reg_username" name="username" placeholder="username">
+								<input type="text" class="form-control" id="reg_username" name="username" placeholder="username" required="true">
 							</div>
 							<div class="form-group">
 								<label for="reg_email" class="sr-only">Email</label>
-								<input type="text" class="form-control" id="reg_email" name="email" placeholder="email">
+								<input type="text" class="form-control" id="reg_email" name="email" placeholder="email" required="true">
 							</div>
 							<div class="form-group">
 								<label for="reg_password" class="sr-only">Password</label>
-								<input type="password" class="form-control" id="reg_password" name="password" placeholder="password">
+								<input type="password" class="form-control" id="reg_password" name="password" placeholder="password" required="true">
 							</div>
 							<div class="form-group">
 								<label for="reg_password_confirm" class="sr-only">Password Confirm</label>
-								<input type="password" class="form-control" id="reg_password_confirm" name="confirm_password" placeholder="confirm password">
+								<input type="password" class="form-control" id="reg_password_confirm" name="confirm_password" placeholder="confirm password" required="true">
 							</div>
 						</div>
 						<button type="submit" class="login-button"><i class="fa fa-chevron-right"></i></button>
@@ -47,15 +47,15 @@
 			</div>
 			<div class="flash">
 				{% block content %}
-							{% with messages = get_flashed_messages() %}
-									{% if messages != [] %}
-										{% for message in messages %}   
-											<p>{{ message[0] }}</p>
-											<p>{{ message[1] }}</p>
-											<p>{{ message[2] }}</p>
-										{% endfor %}
-									{% endif %}
-							{% endwith %}
+						{% with messages = get_flashed_messages() %}
+								{% if messages != [] %}
+									{% for message in messages %}   
+										<p>{{ message[0] }}</p>
+										<p>{{ message[1] }}</p>
+										<p>{{ message[2] }}</p>
+									{% endfor %}
+								{% endif %}
+						{% endwith %}
 				{% endblock %}
 			</div>
 		</div>
