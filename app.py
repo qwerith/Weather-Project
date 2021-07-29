@@ -4,6 +4,7 @@ from weather import get_weather
 from accounts import Accounts, input_validation, login_required
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv, find_dotenv
+from datetime import datetime
 
 load_dotenv(find_dotenv())
 secret_key = os.getenv("FLASK_SECRET_KEY")
@@ -25,7 +26,7 @@ def index():
         DATA = get_weather(location)
         print(DATA)
         STATUS = f"{location} not found"
-        return render_template('index.html', status=STATUS) if type(DATA) == RuntimeError else render_template("index.html", data=DATA) 
+        return render_template('index.html', status=STATUS) if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week) 
     else:
         return render_template("index.html")
 
@@ -108,6 +109,12 @@ def change_password():
             return redirect("/")
         return redirect("/change_password")
     return render_template("change_password.html")
+
+
+def day_of_week(date):
+    date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+    day = str(date.strftime('%A')) + "\n" + str(int(date.weekday()) + 1)
+    return day
 
 
 if __name__=="__main__":

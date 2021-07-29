@@ -303,4 +303,47 @@ label:hover:before {
 
 }
 
+.delete_btn {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  border: 1px solid;
+  box-shadow: 0 0 0;
+  border-radius: 5px;
+  color: black;
+  background: #f0f0f0;
+  padding: 7px 0;
+  font-weight: bold;
+  height: auto;
+  width: 300px;
+  margin-top: 20px;
+}
+
+.delete_btn:hover {
+  background: white;
+  color: #CE1620;
+}
+
+.change_btn {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  border: 1px solid;
+  box-shadow: 0 0 0;
+  border-radius: 5px;
+  color: black;
+  background: #f0f0f0;
+  padding: 7px 0;
+  font-weight: bold;
+  height: auto;
+  width: 300px;
+  margin-top: 20px;
+}
+
+.change_btn:hover {
+  background: white;
+  color: #0074B7;
+}
 

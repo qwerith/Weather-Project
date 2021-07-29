@@ -22,10 +22,13 @@
                         <a class="btn btn-outline-dark" type="button" id="logut_btn" href="/login">Login</a>
                     {% else %}
                     <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ session.username }}
+                        <button class="btn btn-secondary" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                            </svg></i>
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenu2" href="/logout">
+                            <li><label class="email">{{ session.username }}</label></li>
                           <li><a class="dropdown-item"  href="/change_password">Change password</a></li>
                           <li><a class="dropdown-item"  href="/delete">Delete account</a></li>
                           <li><a class="dropdown-item"  href="/logout">Logout</a></li>
@@ -48,11 +51,11 @@
         <div class="container-fluid">
             <nav>
                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">{{ data[0][0][0].split()[0]}}</button>
-                <button class="nav-link"id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">{{ data[1][0][0].split()[0]}}</button>
-                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">{{ data[2][0][0].split()[0]}}</button>
-                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact1" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">{{ data[3][0][0].split()[0]}}</button>
-                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact2" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">{{ data[4][0][0].split()[0]}}</button>
+                <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">{{ day_of_week(data[0][0][0])}}</button>
+                <button class="nav-link"id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">{{ day_of_week(data[1][0][0])}}</button>
+                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">{{ day_of_week(data[2][0][0])}}</button>
+                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact1" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">{{ day_of_week(data[3][0][0])}}</button>
+                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact2" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">{{ day_of_week(data[4][0][0])}}</button>
                 </div>
             </nav>
         </div>
@@ -62,25 +65,25 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Time</th>
-                            <th>min temp °C</th>
-                            <th>max temp °C</th>
-                            <th>humidity</th>
-                            <th>conditions</th>
-                            <th>picture</th>
-                            <th>wind direction</th>
-                            <th>wind_speed</th>
+                            <th>Min temp °C</th>
+                            <th>Max temp °C</th>
+                            <th>Humidity</th>
+                            <th>Conditions</th>
+                            <th>Wind direction</th>
+                            <th>Wind speed m/s</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for i in data[0] %}
                             <tr>
-                                <td>{{ i[0].split()[1]}}</td>
+                                <td>{{ i[0].split()[1] }}</td>
                                 <td>{{ i[1]["min_temp"] }}°</td>
                                 <td>{{ i[1]["max_temp"] }}°</td>
-                                <td>{{ i[1]["humidity"] }}</td>
-                                <td>{{ i[1]["conditions"] }}</td>
-                                <td>{{ i[1]["picture_name"] }}</td>
-                                <td>{{ i[1]["wind"] }}</td>
+                                <td>{{ i[1]["humidity"] }}%</td>
+                                {% set image_name = i[1]["picture_name"]+".png" %}
+                                {% set direction = "-"+i[1]["wind"]+"deg" %}
+                                <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;"></picture></td>
+                                <td>{{ i[1]["wind"] }} <i class="arrow" style=transform:rotate({{direction}});-webkit-transform:rotate({{direction}});></i></td>
                                 <td>{{ i[1]["wind_speed"] }}</td>
                             </tr>
                         {% endfor %}
@@ -92,13 +95,12 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Time</th>
-                            <th>min temp°C</th>
-                            <th>max temp°C</th>
-                            <th>humidity</th>
-                            <th>conditions</th>
-                            <th>picture</th>
-                            <th>wind direction</th>
-                            <th>wind_speed</th>
+                            <th>Min temp°C</th>
+                            <th>Max temp°C</th>
+                            <th>Humidity</th>
+                            <th>Conditions</th>
+                            <th>Wind direction</th>
+                            <th>Wind speed m/s</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -107,10 +109,11 @@
                                 <td>{{ i[0].split()[1] }}</td>
                                 <td>{{ i[1]["min_temp"] }}°</td>
                                 <td>{{ i[1]["max_temp"] }}°</td>
-                                <td>{{ i[1]["humidity"] }}</td>
-                                <td>{{ i[1]["conditions"] }}</td>
-                                <td>{{ i[1]["picture_name"] }}</td>
-                                <td>{{ i[1]["wind"] }}</td>
+                                <td>{{ i[1]["humidity"] }}%</td>
+                                {% set image_name = i[1]["picture_name"]+".png" %}
+                                {% set direction = i[1]["wind"] %}
+                                <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;"></picture></td>
+                                <td>{{ i[1]["wind"] }} <i class="arrow" style=transform:rotate(direction+deg);-webkit-transform:rotate(direction+deg);></i></td>
                                 <td>{{ i[1]["wind_speed"] }}</td>
                             </tr>
                         {% endfor %}
@@ -123,13 +126,12 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Time</th>
-                            <th>min temp°C</th>
-                            <th>max temp°C</th>
-                            <th>humidity</th>
-                            <th>conditions</th>
-                            <th>picture</th>
-                            <th>wind direction</th>
-                            <th>wind_speed</th>
+                            <th>Min temp°C</th>
+                            <th>Max temp°C</th>
+                            <th>Humidity</th>
+                            <th>Conditions</th>
+                            <th>Wind direction</th>
+                            <th>Wind speed m/s</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -138,9 +140,9 @@
                                 <td>{{ i[0].split()[1] }}</td>
                                 <td>{{ i[1]["min_temp"] }}°</td>
                                 <td>{{ i[1]["max_temp"] }}°</td>
-                                <td>{{ i[1]["humidity"] }}</td>
-                                <td>{{ i[1]["conditions"] }}</td>
-                                <td>{{ i[1]["picture_name"] }}</td>
+                                <td>{{ i[1]["humidity"] }}%</td>
+                                {% set image_name = i[1]["picture_name"]+".png" %}
+                                <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;"></picture></td>
                                 <td>{{ i[1]["wind"] }}</td>
                                 <td>{{ i[1]["wind_speed"] }}</td>
                             </tr>
@@ -154,13 +156,12 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Time</th>
-                            <th>min temp°C</th>
-                            <th>max temp°C</th>
-                            <th>humidity</th>
-                            <th>conditions</th>
-                            <th>picture</th>
-                            <th>wind direction</th>
-                            <th>wind_speed</th>
+                            <th>Min temp°C</th>
+                            <th>Max temp°C</th>
+                            <th>Humidity</th>
+                            <th>Conditions</th>
+                            <th>Wind direction</th>
+                            <th>Wind speed m/s</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -169,9 +170,9 @@
                                 <td>{{ i[0].split()[1] }}</td>
                                 <td>{{ i[1]["min_temp"] }}°</td>
                                 <td>{{ i[1]["max_temp"] }}°</td>
-                                <td>{{ i[1]["humidity"] }}</td>
-                                <td>{{ i[1]["conditions"] }}</td>
-                                <td>{{ i[1]["picture_name"] }}</td>
+                                <td>{{ i[1]["humidity"] }}%</td>
+                                {% set image_name = i[1]["picture_name"]+".png" %}
+                                <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;"></picture></td>
                                 <td>{{ i[1]["wind"] }}</td>
                                 <td>{{ i[1]["wind_speed"] }}</td>
                             </tr>
@@ -185,13 +186,12 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Time</th>
-                            <th>min temp°C</th>
-                            <th>max temp°C</th>
-                            <th>humidity</th>
-                            <th>conditions</th>
-                            <th>picture</th>
-                            <th>wind direction</th>
-                            <th>wind_speed</th>
+                            <th>Min temp°C</th>
+                            <th>Max temp°C</th>
+                            <th>Humidity</th>
+                            <th>Conditions</th>
+                            <th>Wind direction</th>
+                            <th>Wind speed m/s</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -200,9 +200,9 @@
                                 <td>{{ i[0].split()[1] }}</td>
                                 <td>{{ i[1]["min_temp"] }}°</td>
                                 <td>{{ i[1]["max_temp"] }}°</td>
-                                <td>{{ i[1]["humidity"] }}</td>
-                                <td>{{ i[1]["conditions"] }}</td>
-                                <td>{{ i[1]["picture_name"] }}</td>
+                                <td>{{ i[1]["humidity"] }}%</td> 
+                                {% set image_name = i[1]["picture_name"]+".png" %}
+                                <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;"></picture></td>
                                 <td>{{ i[1]["wind"] }}</td>
                                 <td>{{ i[1]["wind_speed"] }}</td>
                             </tr>
