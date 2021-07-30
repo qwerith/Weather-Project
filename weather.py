@@ -20,7 +20,7 @@ class Parse_var(Enum):
     API_RES_PARAMS = [["dt"], ["main","temp_min"], ["main","temp_max"],["main","humidity"],
         ["weather", 0,"description"], ["wind", "deg"], ["weather", 0, "icon"], ["wind", "speed"]]
     # "" Not used, added to list because it needs to have length of 8
-    DB_RES_KEYS = ["min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed", ""]
+    DB_RES_KEYS = ["min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed", "ID", "Location", "Lat", "Lon", ""]
 
 
 #converts input value to request string
@@ -28,7 +28,8 @@ def convert_location_to_query(location):
     #if input is coordinates, regex uses "pattern_replace" variable to strips all characters not noted in "[^. -1234567890]"
     pattern_replace = "[^. -1234567890]"
     if input_type_check(location) == "name":
-        location = "q=" + location
+        location = "q=" + location.capitalize()
+        print(location)
     else:
         location = re.sub(pattern_replace,'',location)
         #divides coordinates string into two parts (latitude and longitude) and strips them from all characters noted in "[,'"!@#$%^&*()_+=|/?>,<`~]"
@@ -44,7 +45,7 @@ def get_input(location):
     if len(location) > 30 or len(location) <= 2:
         location = "q=Lviv"
     else:
-         location = convert_location_to_query(location)
+        location = convert_location_to_query(location)
     return location
 
 
@@ -97,9 +98,11 @@ class Cache():
             location_name = location_input[2: ]
         db_location = [request_data["city"]["id"], location_name, coords.split("&")[0].split("=")[1], 
         coords.split("&")[1].split("=")[1], datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')]
-        cur.execute("INSERT INTO location (id, location_name, lat, lon, request_date) VALUES (%s, %s, %s, %s, %s)",
-        (db_location[0], db_location[1], db_location[2], db_location[3], db_location[4]))
-        con.commit()
+        try:
+            cur.execute("INSERT INTO location (id, location_name, lat, lon, request_date) VALUES (%s, %s, %s, %s, %s)",
+            (db_location[0], db_location[1], db_location[2], db_location[3], db_location[4]))
+            con.commit()
+        except: raise RuntimeError("Internal Error")
 
     #parses data in particular order for further insertion into "weather" table
     def parse_api_response(request_data):
@@ -147,10 +150,11 @@ class Cache():
             temp_dict = {}
             date = i[0].strftime('%Y-%m-%d %H:%M:%S')
             for char in i[1:]:
-                #normalises string data by removing whitespaces
-                char = char.replace(" ","")
-                if "."  in char:
-                    char = round(float(char))
+                if type(char) != int:
+                    #normalises string data by removing whitespaces
+                    char = char.replace(" ","")
+                    if "."  in char and len(char) == 4:
+                        char = round(float(char))
                 temp_dict.update({keys[count]:char})
                 count += 1 
             weather_dict.update({date:temp_dict})
@@ -171,11 +175,11 @@ class Cache():
 
     #queries "location" and "weather" tables for data
     def read(id):
-        cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions, picture_name, wind, wind_speed
-        FROM weather WHERE location_id=%s ORDER BY date""", (id,))
+        cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions, picture_name, wind, wind_speed, location_id, location_name, lat, lon 
+        FROM weather INNER JOIN location ON weather.location_id=location.id WHERE location_id=%s""", (id, ))
         query_result = cur.fetchall()
         con.commit()
         return Cache.parse_database_response(query_result)
         
 result = get_weather("Lutsk")
-#print(result)
+print(result)

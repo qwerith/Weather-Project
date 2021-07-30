@@ -25,6 +25,7 @@ body {
   padding: 10px;
   font-family: 'Varela Round';
   height: 100%;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -347,3 +348,10 @@ label:hover:before {
   color: #0074B7;
 }
 
+#btn-home {
+  position: absolute;
+  float: left;
+  left: 1%;
+  top: 2%;
+  text-align: left;
+}

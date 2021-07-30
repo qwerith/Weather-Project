@@ -87,7 +87,7 @@
                                 {% set image_name = i[1]["picture_name"]+".png" %}
                                 {% set direction = compass(i[1]["wind"])+"deg" %}
                                 <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;"></picture></td>
-                                <td> <i class="arrow" style=transform:rotate({{direction}});-webkit-transform:rotate({{direction}});></i> {{ i[1]["wind_speed"] }} m/s </td>
+                                <td><i class="arrow" style=transform:rotate({{direction}});-webkit-transform:rotate({{direction}});></i> {{ i[1]["wind_speed"] }} m/s </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -210,6 +210,9 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="location">
+        <label class="location">{{data[0][0][1]['Location']}} Id: {{ data[0][0][1]['ID']}} Lat: {{data[0][0][1]['Lat']}} Lon: {{data[0][0][1]['Lon']}}</label>
     </div>
         {% endif %}
     </div>

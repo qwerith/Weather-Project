@@ -130,7 +130,6 @@ def compass(direction):
         direction = (135 - direction)
     return str(direction)
     
-
-
+        
 if __name__=="__main__":
     app.run()    

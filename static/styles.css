@@ -180,3 +180,10 @@
 .p-newline {
     margin: 0;
 }
+
+.location {
+    display: flex;
+    width: auto;
+    justify-content: center;
+    margin-top: -15px;
+}
