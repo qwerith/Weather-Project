@@ -18,14 +18,23 @@ class Accounts():
         self.password = password.strip(" ")
 
     def register(self, username):
-        if cur.execute("SELECT EXISTS(SELECT 1 FROM users WHERE email=%s LIMIT 1)", (self.email, )):
-            return "Account already exists"  
+        try:
+            con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"), port=5431)
+            cur = con.cursor()
+        except: raise RuntimeError("Database credentials error")
+        cur.execute("SELECT EXISTS(SELECT 1 FROM users WHERE email = %s LIMIT 1)", (self.email, ))
+        con.commit()
+        if cur.fetchall():
+            return ["Account already exists"]  
         else:
             try:
                 cur.execute("INSERT INTO users (username, email, password) VALUES ( %s, %s, %s )", (username.strip(" "), self.email, bcrypt.generate_password_hash(self.password).decode("utf-8")))
                 con.commit()
-                return "Your account has been successfully created"
-            except: return "Registration failed"    
+                con.close()
+                return ["Your account has been successfully created"]
+            except:
+                con.close()
+                return ["Registration failed"]
     
     def user_verification(self):
         cur.execute("SELECT id, username, email, password FROM users WHERE email=%s LIMIT 1", (self.email, ))

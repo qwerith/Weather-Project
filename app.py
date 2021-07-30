@@ -26,7 +26,7 @@ def index():
         DATA = get_weather(location)
         print(DATA)
         STATUS = f"{location} not found"
-        return render_template('index.html', status=STATUS) if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week) 
+        return render_template('index.html', status=STATUS) if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass) 
     else:
         return render_template("index.html")
 
@@ -62,7 +62,9 @@ def login():
             user = user.user_verification()
             if user:
                 session["user_id"] = user[1][0][0]
-                session["username"] = user[1][0][2]
+                session["username"] = user[1][0][1]
+                session["email"] = user[1][0][2]
+                
                 print(session["user_id"])
                 return redirect("/")
             else:
@@ -83,10 +85,10 @@ def logout():
 @app.route("/delete", methods=["GET", "POST"])
 def delete():
     if request.method == "POST" and request.form.get("password") != "":
-        input_valid = input_validation([session["username"], request.form.get("password")])
+        input_valid = input_validation([session["email"], request.form.get("password")])
         if input_valid != []:
             flash(input_valid, "info")
-        user = Accounts(session["username"], request.form.get("password"))
+        user = Accounts(session["email"], request.form.get("password"))
         if user.user_verification():
             user.delete()
             session.pop("user_id", None)
@@ -99,11 +101,11 @@ def delete():
 @app.route("/change_password", methods=["GET", "POST"])
 def change_password():
     if request.method == "POST" and request.form.get("password") != "":
-        input_valid = input_validation([session["username"], request.form.get("password"),
+        input_valid = input_validation([session["email"], request.form.get("password"),
         request.form.get("password_new"), request.form.get("password_new_confirm")])
         if input_valid != []:
             flash(input_valid, "info")
-        user = Accounts(session["username"], request.form.get("password"))
+        user = Accounts(session["email"], request.form.get("password"))
         if user.user_verification():
             user.change_password(request.form.get("password_new"))
             return redirect("/")
@@ -113,8 +115,21 @@ def change_password():
 
 def day_of_week(date):
     date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-    day = str(date.strftime('%A')) + "\n" + str(int(date.weekday()) + 1)
+    day_number = str(date).split(" ")[0].split("-")[2]
+    if day_number[0] == '0':
+        day_number = day_number[1]
+    day = (str(date.strftime('%A')), day_number, date.strftime("%B"))
     return day
+
+
+def compass(direction):
+    direction = int(direction)
+    if direction > 135:
+        direction = (direction - 135)
+    elif direction < 135:
+        direction = (135 - direction)
+    return str(direction)
+    
 
 
 if __name__=="__main__":

@@ -176,3 +176,7 @@
     display: inline-block;
     padding: 3px;
   }
+
+.p-newline {
+    margin: 0;
+}
