@@ -17,9 +17,10 @@ if not API_KEY:
 
 
 class Parse_var(Enum):
+    """Used to store parameters for different functions in one place"""
     API_RES_PARAMS = [["dt"], ["main","temp_min"], ["main","temp_max"],["main","humidity"],
         ["weather", 0,"description"], ["wind", "deg"], ["weather", 0, "icon"], ["wind", "speed"]]
-    # "" Not used, added to list because it needs to have length of 8
+    # "" Not used, added to list because it needs to be of certain length
     DB_RES_KEYS = ["min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed", "ID", "Location", "Lat", "Lon", ""]
 
 
@@ -29,7 +30,6 @@ def convert_location_to_query(location):
     pattern_replace = "[^. -1234567890]"
     if input_type_check(location) == "name":
         location = "q=" + location.capitalize()
-        print(location)
     else:
         location = re.sub(pattern_replace,'',location)
         #divides coordinates string into two parts (latitude and longitude) and strips them from all characters noted in "[,'"!@#$%^&*()_+=|/?>,<`~]"
@@ -85,9 +85,8 @@ def get_weather(location_input):
         return Cache.read(check[2])
 
 
-#manages cache in postgres database
 class Cache():
-
+    """Manages cache in postgres database, parses data for further usage in flask templates"""
     #inserts rows in "location" table if particular location is not found by "cache_check()" function
     def write_location(request_data, location_input):
         if input_type_check(location_input) == "coords":
@@ -181,5 +180,5 @@ class Cache():
         con.commit()
         return Cache.parse_database_response(query_result)
         
-result = get_weather("Lutsk")
-print(result)
+#result = get_weather("Lutsk")
+#print(result)

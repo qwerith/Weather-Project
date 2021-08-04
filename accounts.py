@@ -13,6 +13,7 @@ except: raise RuntimeError("Database credentials error")
 
 
 class Accounts():
+    """Manages user accounts, queries data for session module"""
     def __init__(self, email, password):
         self.email = email.strip(" ")
         self.password = password.strip(" ")

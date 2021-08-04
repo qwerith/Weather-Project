@@ -24,7 +24,7 @@ def index():
         print(request.form.get("location"))
         location = request.form.get("location")
         DATA = get_weather(location)
-        print(DATA)
+        #print(DATA)
         STATUS = f"{location} not found"
         return render_template('index.html', status=STATUS) if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass) 
     else:
