@@ -73,7 +73,7 @@ def get_weather(location_input):
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?{location_input}&units=metric&appid={API_KEY}")
         print(request.status_code)
         parsed = request.json()
-        print(json.dumps(parsed, indent=4, sort_keys=True))
+        #print(json.dumps(parsed, indent=4, sort_keys=True))
         if request.status_code != 200:
             return RuntimeError("Request failed", request.status_code)
         else:
@@ -118,7 +118,7 @@ class Cache():
                 else:
                     temp_list.append(i[p[0]])
             db_weather.append(temp_list)
-        print(db_weather)
+        #print(db_weather)
         return db_weather
 
     #inserts data into "weather table" if it is found to be absent or outdated by "cache_check()"" function

@@ -22,13 +22,13 @@
                         <a class="btn btn-outline-dark" type="button" id="logut_btn" href="/login">Login</a>
                     {% else %}
                     <div class="dropdown">
-                        <button class="btn btn-secondary" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false" title={{session.username}}>
+                        <button class="btn btn-secondary" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false" title={{session.email}}>
                             <i class="bi bi-person"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
                             <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
                             </svg></i>
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenu2" href="/logout">
-                            <li><label class="email">{{ session.email }}</label></li>
+                            <li><label class="email" id="email">{{ session.username }}</label></li>
                           <li><a class="dropdown-item"  href="/change_password">Change password</a></li>
                           <li><a class="dropdown-item"  href="/delete">Delete account</a></li>
                           <li><a class="dropdown-item"  href="/logout">Logout</a></li>
@@ -52,7 +52,7 @@
             <nav>
                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
                 <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">
-                {% set date=day_of_week(data[0][0][0]) %}{{ date[0]}}<p class="p-newline">{{ date[1] }} {{ date[2] }}</p></button>
+                    {% set date=day_of_week(data[0][0][0]) %}{{ date[0]}}<p class="p-newline">{{ date[1] }} {{ date[2] }}</p></button>
                 <button class="nav-link"id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">
                     {% set date=day_of_week(data[1][0][0]) %}{{ date[0]}}<p class="p-newline">{{ date[1]}} {{ date[2] }}</button>
                 <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
@@ -212,7 +212,18 @@
         </div>
     </div>
     <div class="location">
-        <label class="location">{{data[0][0][1]['Location']}} Id: {{ data[0][0][1]['ID']}} Lat: {{data[0][0][1]['Lat']}} Lon: {{data[0][0][1]['Lon']}}</label>
+        <div class="location-info">
+            <label class="location-name">{{data[0][0][1]['Location']}} Id: {{ data[0][0][1]['ID']}} Lat: {{data[0][0][1]['Lat']}} Lon: {{data[0][0][1]['Lon']}}</label>
+        </div>
+        <div class="track">
+            <form class="track" action="/track" method="POST">
+            <button class="btn-track" id="btn-track" type="submit" aria-expanded="false" title="Send to Email" name="location" value="{{data[0][0][1]['Location']}}">
+                <i class="bi bi-envelope-fill"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-envelope-fill" viewBox="0 0 16 16">
+                    <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555zM0 4.697v7.104l5.803-3.558L0 4.697zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757zm3.436-.586L16 11.801V4.697l-5.803 3.546z"/>
+                </svg></i> Track
+            </button>
+        </form>
+        </div>
     </div>
         {% endif %}
     </div>

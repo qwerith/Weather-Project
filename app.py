@@ -4,7 +4,7 @@ from weather import get_weather
 from accounts import Accounts, input_validation, login_required
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv, find_dotenv
-from datetime import datetime
+from mailing import send_gmail, day_of_week
 
 load_dotenv(find_dotenv())
 secret_key = os.getenv("FLASK_SECRET_KEY")
@@ -18,13 +18,11 @@ bcrypt = Bcrypt(app)
 
 
 @app.route('/', methods=["GET", "POST"])
-#@login_required
 def index():
     if request.method == "POST" and request.form.get("location"):
         print(request.form.get("location"))
         location = request.form.get("location")
         DATA = get_weather(location)
-        #print(DATA)
         STATUS = f"{location} not found"
         return render_template('index.html', status=STATUS) if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass) 
     else:
@@ -34,7 +32,7 @@ def index():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     form = [request.form.get("username"), request.form.get("email"), request.form.get("password"), request.form.get("confirm_password")]
-    if request.method == "POST" and all(char != "" for char in form):
+    if request.method == "POST" and all(char != "" for char in form) and len(form[0]) < 20:
         input_valid = input_validation(form[1:4])
         form.clear()
         if not input_valid == []:     
@@ -113,13 +111,19 @@ def change_password():
     return render_template("change_password.html")
 
 
-def day_of_week(date):
-    date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-    day_number = str(date).split(" ")[0].split("-")[2]
-    if day_number[0] == '0':
-        day_number = day_number[1]
-    day = (str(date.strftime('%A')), day_number, date.strftime("%B"))
-    return day
+@login_required
+@app.route("/track", methods=["POST"])
+def track():
+    if request.method == "POST":
+        # and session["track"] not in [None, request.form.get("location_id")]
+        location=request.form.get("location")
+        session["track"] = location
+        print(session["track"])
+        DATA = get_weather(location)
+        if type(DATA) != RuntimeError:
+            send_gmail(DATA, session["email"])
+        return ('', 204)
+    return redirect("/")
 
 
 def compass(direction):

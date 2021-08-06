@@ -25,7 +25,9 @@ class Accounts():
         except: raise RuntimeError("Database credentials error")
         cur.execute("SELECT EXISTS(SELECT 1 FROM users WHERE email = %s LIMIT 1)", (self.email, ))
         con.commit()
-        if cur.fetchall():
+        result = cur.fetchall()
+        print(result)
+        if result[0][0] != False:
             return ["Account already exists"]  
         else:
             try:

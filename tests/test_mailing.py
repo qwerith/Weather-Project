@@ -1,5 +1,7 @@
 import unittest
 from mailing import send_gmail
+from app import track
+from flask import Flask, redirect, request, session, render_template, flash, url_for
 
 class Mailing_Test(unittest.TestCase):
 
@@ -14,8 +16,8 @@ class Mailing_Test(unittest.TestCase):
     #def test_db_query(self):
         #pass
 
-    #def test_endpoint_response(self):
-        #pass
+    def test_endpoint_response(self):
+        self.assertEqual(track(), redirect("/"))
 
     #def test_db_update(self):
         #pass

@@ -149,9 +149,16 @@
 }
 
 .dropdown-menu {
+    max-width: 170px;
     text-align: left;
     align-items: left;
     float: left;
+}
+
+#email {
+    position: relative;
+    max-width: 170px;
+    overflow: hidden;
 }
 
 .bi .bi-person {
@@ -175,7 +182,7 @@
     border-width: 0 3px 3px 0;
     display: inline-block;
     padding: 3px;
-  }
+}
 
 .p-newline {
     margin: 0;
@@ -184,6 +191,48 @@
 .location {
     display: flex;
     width: auto;
-    justify-content: center;
+    padding: 0 25% 0 25%;
     margin-top: -15px;
+    justify-content: center;
+}
+
+.location-info {
+    display: flex;
+    width: 83%;
+    justify-content: center;
+}
+
+.location-name {
+    margin-top: -15px;
+}
+
+.track {
+    position: relative;
+    display: flex;
+    width: auto;
+    justify-content: flex-end;
+}
+
+#btn-track {
+    margin-top: -15px;
+    margin-right: -45px;
+    color: #212529;
+    text-decoration: none;
+    background-color: inherit;
+    border: none;
+    font-weight: bold;
+    padding-top: 0;
+    padding-bottom: 2px;
+}
+
+#btn-track:active {
+    margin-top: -15px;
+    margin-right: -45px;
+    color: white;
+    text-decoration: none;
+    background-color: black;
+    border-radius: 50px;
+    font-weight: bold;
+    padding-top: 0;
+    padding-bottom: 2px;
 }
