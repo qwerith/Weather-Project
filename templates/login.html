@@ -1,3 +1,4 @@
+{% from 'macros.html' import flash_messages %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,19 +45,7 @@
                     </div>
                 </form>
             </div>
-            <div class="flash">
-                {% block content %}
-                        {% with messages = get_flashed_messages() %}
-                                {% if messages != [] %}
-                                    {% for message in messages %}   
-                                        <p>{{ message[0] }}</p>
-                                        <p>{{ message[1] }}</p>
-                                        <p>{{ message[2] }}</p>
-                                    {% endfor %}
-                                {% endif %}
-                        {% endwith %}
-                {% endblock %}
-            </div>
+            {{ flash_messages() }}
         </div>
     </body>
 </html>

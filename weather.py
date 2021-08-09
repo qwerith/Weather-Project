@@ -175,7 +175,7 @@ class Cache():
     #queries "location" and "weather" tables for data
     def read(id):
         cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions, picture_name, wind, wind_speed, location_id, location_name, lat, lon 
-        FROM weather INNER JOIN location ON weather.location_id=location.id WHERE location_id=%s""", (id, ))
+        FROM weather INNER JOIN location ON weather.location_id=location.id WHERE location_id=%s ORDER BY date ASC""", (id, ))
         query_result = cur.fetchall()
         con.commit()
         return Cache.parse_database_response(query_result)

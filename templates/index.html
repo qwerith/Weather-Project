@@ -1,3 +1,4 @@
+{% from 'macros.html' import table_header, table_data %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,147 +67,37 @@
         </div>
         <div class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab"><div class="container-fluid">
-                <table class="table">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Time</th>
-                            <th>Min temp °C</th>
-                            <th>Max temp °C</th>
-                            <th>Humidity</th>
-                            <th>Conditions</th>
-                            <th> Wind </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for i in data[0] %}
-                            <tr>
-                                <td>{{ i[0].split()[1] }}</td>
-                                <td>{{ i[1]["min_temp"] }}°</td>
-                                <td>{{ i[1]["max_temp"] }}°</td>
-                                <td>{{ i[1]["humidity"] }}%</td>
-                                {% set image_name = i[1]["picture_name"]+".png" %}
-                                {% set direction = compass(i[1]["wind"])+"deg" %}
-                                <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;"></picture></td>
-                                <td><i class="arrow" style=transform:rotate({{direction}});-webkit-transform:rotate({{direction}});></i> {{ i[1]["wind_speed"] }} m/s </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                  </table>
+                <table class="table">   
+                {{ table_header() }}
+                    {{ table_data(data,compass, 0) }}
+                </table>
             </div></div>
             <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab"><div class="container-fluid">
-                <table class="table">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Time</th>
-                            <th>Min temp°C</th>
-                            <th>Max temp°C</th>
-                            <th>Humidity</th>
-                            <th>Conditions</th>
-                            <th> Wind </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for i in data[1] %}
-                            <tr>
-                                <td>{{ i[0].split()[1] }}</td>
-                                <td>{{ i[1]["min_temp"] }}°</td>
-                                <td>{{ i[1]["max_temp"] }}°</td>
-                                <td>{{ i[1]["humidity"] }}%</td>
-                                {% set image_name = i[1]["picture_name"]+".png" %}
-                                {% set direction = compass(i[1]["wind"])+"deg" %}
-                                <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;"></picture></td>
-                                <td><i class="arrow" style=transform:rotate({{direction}});-webkit-transform:rotate({{direction}});></i> {{ i[1]["wind_speed"] }} m/s </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                  </table>
+                <table class="table"> 
+                {{ table_header() }}
+                    {{ table_data(data,compass, 1) }}
+                </table>
                 </div>
             </div>
             <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab"><div class="container-fluid">
                 <table class="table">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Time</th>
-                            <th>Min temp°C</th>
-                            <th>Max temp°C</th>
-                            <th>Humidity</th>
-                            <th>Conditions</th>
-                            <th> Wind </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for i in data[2] %}
-                            <tr>
-                                <td>{{ i[0].split()[1] }}</td>
-                                <td>{{ i[1]["min_temp"] }}°</td>
-                                <td>{{ i[1]["max_temp"] }}°</td>
-                                <td>{{ i[1]["humidity"] }}%</td>
-                                {% set image_name = i[1]["picture_name"]+".png" %}
-                                {% set direction = compass(i[1]["wind"])+"deg" %}
-                                <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;"></picture></td>
-                                <td><i class="arrow" style=transform:rotate({{direction}});-webkit-transform:rotate({{direction}});></i> {{ i[1]["wind_speed"] }} m/s</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                  </table>
+                    {{ table_header() }}
+                        {{ table_data(data,compass, 2) }}
+                </table>
                 </div>
             </div>
             <div class="tab-pane fade" id="nav-contact1" role="tabpanel" aria-labelledby="nav-contact-tab"><div class="container-fluid">
                 <table class="table">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Time</th>
-                            <th>Min temp°C</th>
-                            <th>Max temp°C</th>
-                            <th>Humidity</th>
-                            <th>Conditions</th>
-                            <th> Wind </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for i in data[3] %}
-                            <tr>
-                                <td>{{ i[0].split()[1] }}</td>
-                                <td>{{ i[1]["min_temp"] }}°</td>
-                                <td>{{ i[1]["max_temp"] }}°</td>
-                                <td>{{ i[1]["humidity"] }}%</td>
-                                {% set image_name = i[1]["picture_name"]+".png" %}
-                                {% set direction = compass(i[1]["wind"])+"deg" %}
-                                <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;"></picture></td>
-                                <td><i class="arrow" style=transform:rotate({{direction}});-webkit-transform:rotate({{direction}});></i> {{ i[1]["wind_speed"] }} m/s</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                  </table>
+                    {{ table_header() }}
+                        {{ table_data(data,compass, 3) }}
+                </table>
                 </div>
             </div>
             <div class="tab-pane fade" id="nav-contact2" role="tabpanel" aria-labelledby="nav-contact-tab"><div class="container-fluid">
                 <table class="table">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Time</th>
-                            <th>Min temp°C</th>
-                            <th>Max temp°C</th>
-                            <th>Humidity</th>
-                            <th>Conditions</th>
-                            <th> Wind </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for i in data[4] %}
-                            <tr>
-                                <td>{{ i[0].split()[1] }}</td>
-                                <td>{{ i[1]["min_temp"] }}°</td>
-                                <td>{{ i[1]["max_temp"] }}°</td>
-                                <td>{{ i[1]["humidity"] }}%</td> 
-                                {% set image_name = i[1]["picture_name"]+".png" %}
-                                {% set direction = compass(i[1]["wind"])+"deg" %}
-                                <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;"></picture></td>
-                                <td><i class="arrow" style=transform:rotate({{direction}});-webkit-transform:rotate({{direction}});></i> {{ i[1]["wind_speed"] }} m/s</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                  </table>
+                    {{ table_header() }}
+                        {{ table_data(data,compass, 4) }}
+                </table>
                 </div>
             </div>
         </div>

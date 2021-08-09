@@ -64,13 +64,14 @@ def input_validation(user_input):
     if not (re.match(email_pattern, user_input[0])):
         response.append("Invalid email")
     if not len(user_input[1]) >= 5 and len(user_input[1]) <= 10:
-        response.append("\nPassword must be 5 to 10 characters long")  
+        response.append("Password must be 5 to 10 characters long")  
     if len(user_input) == 3:
         if not user_input[1] == user_input[2]:
             response.append("Passwords do not match")
     if len(user_input) == 4:
         if not user_input[2] == user_input[3]:
             response.append("Passwords do not match")
+    print(response)
     return response
 
 

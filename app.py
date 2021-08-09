@@ -23,6 +23,7 @@ def index():
         print(request.form.get("location"))
         location = request.form.get("location")
         DATA = get_weather(location)
+        print(DATA)
         STATUS = f"{location} not found"
         return render_template('index.html', status=STATUS) if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass) 
     else:
@@ -61,8 +62,7 @@ def login():
             if user:
                 session["user_id"] = user[1][0][0]
                 session["username"] = user[1][0][1]
-                session["email"] = user[1][0][2]
-                
+                session["email"] = user[1][0][2]    
                 print(session["user_id"])
                 return redirect("/")
             else:
@@ -84,7 +84,9 @@ def logout():
 def delete():
     if request.method == "POST" and request.form.get("password") != "":
         input_valid = input_validation([session["email"], request.form.get("password")])
+        print(session["email"])
         if input_valid != []:
+            print("test")
             flash(input_valid, "info")
         user = Accounts(session["email"], request.form.get("password"))
         if user.user_verification():
