@@ -55,8 +55,8 @@ class Accounts():
     def change_password(self, new_password):
         cur.execute("UPDATE users SET password=%s WHERE email=%s", (bcrypt.generate_password_hash(new_password).decode("utf-8"), self.email))
         con.commit()
-
-
+    
+    
 def input_validation(user_input):
     #regex form for email validation
     response = []

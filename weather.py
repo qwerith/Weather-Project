@@ -72,7 +72,7 @@ def get_weather(location_input):
     if check[0] == None:
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?{location_input}&units=metric&appid={API_KEY}")
         print(request.status_code)
-        parsed = request.json()
+        #parsed = request.json()
         #print(json.dumps(parsed, indent=4, sort_keys=True))
         if request.status_code != 200:
             return RuntimeError("Request failed", request.status_code)
@@ -130,8 +130,8 @@ class Cache():
         db_weather = Cache.parse_api_response(request_data)
         #exists = cur.execute("SELECT EXISTS(SELECT 1 FROM weather WHERE location_id = %s LIMIT 1)",(location_id,))
         if status == "outdated":
-            cur.execute("DELETE FROM weather WHERE location_id=%s",(location_id,))
-            cur.execute(f"UPDATE location SET request_date = %s WHERE id = {location_id}", [(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))])
+            cur.execute("DELETE FROM weather WHERE location_id=%s", (location_id,))
+            cur.execute("UPDATE location SET request_date = %s WHERE id = %s", ((datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), location_id)))
         for i in db_weather:
             cur.execute(command,(datetime.fromtimestamp(db_weather[count][0]), db_weather[count][1], db_weather[count][2],
             db_weather[count][3], db_weather[count][4], db_weather[count][5], db_weather[count][6], location_id, db_weather[count][7]))
@@ -151,7 +151,7 @@ class Cache():
             for char in i[1:]:
                 if type(char) != int:
                     #normalises string data by removing whitespaces
-                    char = char.replace(" ","")
+                    char = char.lstrip(" ").rstrip(" ")
                     if "."  in char and len(char) == 4:
                         char = round(float(char))
                 temp_dict.update({keys[count]:char})
@@ -180,5 +180,6 @@ class Cache():
         con.commit()
         return Cache.parse_database_response(query_result)
         
+
 #result = get_weather("Lutsk")
 #print(result)

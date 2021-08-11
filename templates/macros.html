@@ -44,14 +44,14 @@
 {% macro table_data(data, compass, count) %}
 <tbody>
   {% for i in data[count] %}
-      <tr>
+      <tr id="table_row">
           <td>{{ i[0].split()[1] }}</td>
           <td>{{ i[1]["min_temp"] }}°</td>
           <td>{{ i[1]["max_temp"] }}°</td>
           <td>{{ i[1]["humidity"] }}%</td>
           {% set image_name = i[1]["picture_name"]+".png" %}
           {% set direction = compass(i[1]["wind"])+"deg" %}
-          <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;"></picture></td>
+          <td id="picture">{{ i[1]["conditions"] }} <picture><img src="{{ url_for('static', filename = 'images/'+image_name) }}" alt="Image error" style="width:20%;height:20%;min-height:53.55px;min-width:53.55px;"></picture></td>
           <td><i class="arrow" style=transform:rotate({{direction}});-webkit-transform:rotate({{direction}});></i> {{ i[1]["wind_speed"] }} m/s </td>
       </tr>
   {% endfor %}

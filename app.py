@@ -4,7 +4,7 @@ from weather import get_weather
 from accounts import Accounts, input_validation, login_required
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv, find_dotenv
-from mailing import send_gmail, day_of_week
+from mailing import send_gmail, day_of_week, set_up_track
 
 load_dotenv(find_dotenv())
 secret_key = os.getenv("FLASK_SECRET_KEY")
@@ -23,7 +23,6 @@ def index():
         print(request.form.get("location"))
         location = request.form.get("location")
         DATA = get_weather(location)
-        print(DATA)
         STATUS = f"{location} not found"
         return render_template('index.html', status=STATUS) if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass) 
     else:
@@ -118,11 +117,13 @@ def change_password():
 def track():
     if request.method == "POST":
         # and session["track"] not in [None, request.form.get("location_id")]
-        location=request.form.get("location")
-        session["track"] = location
+        session.pop("track", None)
+        location_name = request.form.get("location").strip("()").split(",")[0].strip("' ")
+        location_id = request.form.get("location").strip("()").split(",")[1].strip(" ")
+        session["track"] = location_id
         print(session["track"])
-        DATA = get_weather(location)
-        if type(DATA) != RuntimeError:
+        DATA = get_weather(location_name)
+        if set_up_track(session["user_id"], location_id) and type(DATA) != RuntimeError:
             send_gmail(DATA, session["email"])
         return ('', 204)
     return redirect("/")

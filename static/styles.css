@@ -30,6 +30,10 @@
     width: 50%;
 }
 
+#table_row > td {
+    vertical-align: middle;
+}
+
 .container-fluid > nav {
     display: flex;
     justify-content: center;
@@ -58,7 +62,7 @@
     color: white;
 }
 
- #nav-contact-tab:focus {
+#nav-contact-tab:focus {
     background-color: #212529;
     border-color: #212529;
     color: white;
@@ -101,7 +105,6 @@
     min-width: 130px;
 }
 
-
 .flash {
     list-style-type: none;
 }
@@ -122,6 +125,16 @@
 
 #navbar {
     padding: 3px 0 3px 0;
+}
+
+#container {
+    position: fixed;
+    max-width: 100%;
+    padding: 0;
+}
+
+#container_search {
+    padding-top: 5%;
 }
 
 .d-flex {
