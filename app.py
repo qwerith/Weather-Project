@@ -1,10 +1,10 @@
-import os
+import os, re
 from flask import Flask, redirect, request, session, render_template, flash, url_for
 from weather import get_weather
 from accounts import Accounts, input_validation, login_required
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv, find_dotenv
-from mailing import send_gmail, day_of_week, set_up_track
+from mailing import send_gmail, day_of_week, set_up_track, compose_weather_mail_msg
 
 load_dotenv(find_dotenv())
 secret_key = os.getenv("FLASK_SECRET_KEY")
@@ -115,16 +115,18 @@ def change_password():
 @login_required
 @app.route("/track", methods=["POST"])
 def track():
+    filter = """['" ()]"""
     if request.method == "POST":
         # and session["track"] not in [None, request.form.get("location_id")]
         session.pop("track", None)
-        location_name = request.form.get("location").strip("()").split(",")[0].strip("' ")
-        location_id = request.form.get("location").strip("()").split(",")[1].strip(" ")
+        location_name = re.sub(filter,"",request.form.get("location")).split(",")[0]
+        location_id = re.sub(filter,"",request.form.get("location")).split(",")[1]
+        print(location_name, location_id)
         session["track"] = location_id
         print(session["track"])
         DATA = get_weather(location_name)
         if set_up_track(session["user_id"], location_id) and type(DATA) != RuntimeError:
-            send_gmail(DATA, session["email"])
+            send_gmail(compose_weather_mail_msg(DATA), session["email"])
         return ('', 204)
     return redirect("/")
 

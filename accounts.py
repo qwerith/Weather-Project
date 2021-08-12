@@ -71,7 +71,6 @@ def input_validation(user_input):
     if len(user_input) == 4:
         if not user_input[2] == user_input[3]:
             response.append("Passwords do not match")
-    print(response)
     return response
 
 
