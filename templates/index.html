@@ -30,9 +30,20 @@
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenu2" href="/logout">
                             <li><label class="email" id="email">{{ session.username }}</label></li>
-                          <li><a class="dropdown-item"  href="/change_password">Change password</a></li>
-                          <li><a class="dropdown-item"  href="/delete">Delete account</a></li>
-                          <li><a class="dropdown-item"  href="/logout">Logout</a></li>
+                            {% if session.track %}
+                                {% if data %}
+                                    <form class="track_dropdown" action="/stop_track" method="POST">
+                                        <li><button class="dropdown-item" method="POST" name="location" value="{{data[0][0][1]['Location']}}" title={{session.track_name}}>Stop mailing (Track)</button></li>
+                                    </form>
+                                {% else %}
+                                    <form class="track_dropdown" action="/stop_track" method="POST">
+                                        <li><button class="dropdown-item" method="POST" name="location" value="" title={{session.track_name}}>Stop mailing (Track)</button></li>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                            <li><a class="dropdown-item"  href="/change_password">Change password</a></li>
+                            <li><a class="dropdown-item"  href="/delete">Delete account</a></li>
+                            <li><a class="dropdown-item"  href="/logout">Logout</a></li>
                         </ul>
                     </div>
                     {% endif %}

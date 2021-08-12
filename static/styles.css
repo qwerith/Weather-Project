@@ -226,6 +226,12 @@
     justify-content: flex-end;
 }
 
+.track-dropdown {
+    position: relative;
+    display: flex;
+    width: auto;
+}
+
 #btn-track {
     margin-top: -16px;
     margin-right: -45px;

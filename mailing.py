@@ -27,7 +27,7 @@ if not EMAIL_ADDRESS or not EMAIL_PASSWORD:
 #receiver = "yuriisorokin98@gmail.com"
 
 
-# Inserts weather information into string for further convertion to HTML
+# Inserts weather information into string for further conversion to HTML
 def create_html_table_rows(data):
     length = len(data[0])
     count = -1
@@ -84,6 +84,7 @@ def send_gmail(data, receiver):
         return (e.smtp_code, e.smtp_error)
 
 
+# Inserts into DB mailing table information for further usage in send_gmail function
 def set_up_track(user_id, location_id):
     cur.execute("SELECT EXISTS(SELECT 1 FROM mailing WHERE user_id = %s LIMIT 1)", (user_id, ))
     con.commit()
@@ -98,6 +99,16 @@ def set_up_track(user_id, location_id):
     except: return None
 
 
+# Removes user info from mailing table
+def stop_tracking(user_id):
+    try:
+        cur.execute("DELETE FROM mailing WHERE user_id=%s", (user_id,))
+        con.commit()
+        return True
+    except: return None
+
+
+# Creates html message for sending by "send_gmail" function
 def compose_weather_mail_msg(data):
     date = day_of_week(data[0][0][0])
     date_info = str(date[0]) +" "+ str(date[1])
@@ -142,8 +153,10 @@ def compose_weather_mail_msg(data):
     return data
 
 
-def query_mailing():
+# Queries DB for tracking info, parse response into [[location,email],[location,email],[location,email]...]
+def query_mailing_table():
     mailing_list = []
+    #regex removes <'" ()> from i
     filter = """['" ()]"""
     cur.execute("SELECT (location_name, email) FROM location INNER JOIN mailing ON location.id=mailing.location_id INNER JOIN users ON mailing.user_id=users.id ORDER BY location ASC LIMIT 40")
     try:

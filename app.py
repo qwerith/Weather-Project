@@ -4,7 +4,7 @@ from weather import get_weather
 from accounts import Accounts, input_validation, login_required
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv, find_dotenv
-from mailing import send_gmail, day_of_week, set_up_track, compose_weather_mail_msg
+from mailing import send_gmail, day_of_week, set_up_track, compose_weather_mail_msg, stop_tracking
 
 load_dotenv(find_dotenv())
 secret_key = os.getenv("FLASK_SECRET_KEY")
@@ -115,20 +115,43 @@ def change_password():
 @login_required
 @app.route("/track", methods=["POST"])
 def track():
+    #regex removes <'" ()> from request.form.get("location") value
     filter = """['" ()]"""
-    if request.method == "POST":
-        # and session["track"] not in [None, request.form.get("location_id")]
+    if request.method == "POST" and check_session(request.form.get("location")) == None:
         session.pop("track", None)
+        session.pop("track_name", None)
         location_name = re.sub(filter,"",request.form.get("location")).split(",")[0]
         location_id = re.sub(filter,"",request.form.get("location")).split(",")[1]
         print(location_name, location_id)
         session["track"] = location_id
-        print(session["track"])
+        session["track_name"] = location_name
         DATA = get_weather(location_name)
         if set_up_track(session["user_id"], location_id) and type(DATA) != RuntimeError:
             send_gmail(compose_weather_mail_msg(DATA), session["email"])
-        return ('', 204)
+        return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass) 
     return redirect("/")
+
+
+@login_required
+@app.route("/stop_track", methods=["POST"])
+def stop_track():
+    if request.method == "POST":
+        session.pop("track", None)
+        session.pop("track_name", None)
+        if stop_tracking(session["user_id"]):
+            location_name = request.form.get("location")
+            DATA = get_weather(location_name)
+            return redirect("/") if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass) 
+    return redirect("/")
+
+
+# Checks if track request is already exists
+def check_session(location):
+    filter = """['" ()]"""
+    try:
+        if session["track"] == re.sub(filter,"",location).split(",")[1]:
+            return True
+    except: return None
 
 
 def compass(direction):
