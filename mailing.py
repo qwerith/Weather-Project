@@ -152,6 +152,28 @@ def compose_weather_mail_msg(data):
     data = [plane_txt, html_txt]
     return data
 
+# Compose message for password recovery
+def compose_recovery_mail_msg(password):
+    plane_txt = "MyWeatherApp"
+    html_txt = f"""<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+        </head>
+        <body style="width:30%;">
+            <h1>Your recovery password</h1>
+            <div style="padding:1.5%;color:white;background-color:#212529;text-align:center;">
+                <h1 style="padding:50px 50px;">{password}</h1>
+            </div>
+            <div>
+            <h3>If you did not make this request just ignore this message</h3>
+            </div>
+        </body>
+        </html>
+        """
+    data = [plane_txt, html_txt]
+    return data
+
 
 # Queries DB for tracking info, parse response into [[location,email],[location,email],[location,email]...]
 def query_mailing_table():

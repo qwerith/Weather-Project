@@ -1,4 +1,4 @@
-import psycopg2, os, re
+import psycopg2, os, re, string, random
 from dotenv import load_dotenv, find_dotenv
 from flask_bcrypt import Bcrypt
 from flask import redirect, session
@@ -13,7 +13,7 @@ except: raise RuntimeError("Database credentials error")
 
 
 class Accounts():
-    """Manages user accounts, queries data for session module"""
+    """Manages user accounts, queries data for session module, password changes and recovery"""
     def __init__(self, email, password):
         self.email = email.strip(" ")
         self.password = password.strip(" ")
@@ -56,7 +56,27 @@ class Accounts():
         cur.execute("UPDATE users SET password=%s WHERE email=%s", (bcrypt.generate_password_hash(new_password).decode("utf-8"), self.email))
         con.commit()
     
-    
+    def restore_password(self, temp_password_hash, temp_password):
+        if bcrypt.check_password_hash(temp_password_hash, temp_password):
+            cur.execute("UPDATE users SET password=%s WHERE email=%s", (bcrypt.generate_password_hash(self.password).decode("utf-8"), self.email))
+            con.commit()
+            return True
+        return None
+        
+# Generates random password for recovery process                
+def generate_temporary_password(email):
+    cur.execute("SELECT EXISTS(SELECT 1 FROM users WHERE email = %s LIMIT 1)", (email, ))
+    con.commit()
+    result = cur.fetchall()
+    if result[0][0] != None:
+        chars = string.ascii_uppercase + string.ascii_lowercase + string.digits
+        size = random.randint(5, 10)
+        temp_password = ''.join(random.choice(chars) for x in range(size))
+        password_hash = bcrypt.generate_password_hash(temp_password).decode("utf-8")
+        return password_hash, temp_password
+    return None
+
+
 def input_validation(user_input):
     #regex form for email validation
     response = []
