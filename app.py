@@ -6,6 +6,8 @@ from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv, find_dotenv
 from mailing import send_gmail, day_of_week, set_up_track, compose_weather_mail_msg, stop_tracking
 
+temp_storage = []
+location_list = [{"search_0" : False}, {"search_1" : False}, {"search_2" : False}]
 load_dotenv(find_dotenv())
 secret_key = os.getenv("FLASK_SECRET_KEY")
 if not secret_key:
@@ -20,13 +22,65 @@ bcrypt = Bcrypt(app)
 @app.route('/', methods=["GET", "POST"])
 def index():
     if request.method == "POST" and request.form.get("location"):
-        print(request.form.get("location"))
-        location = request.form.get("location")
+        location = request.form.get("location").capitalize()
+        print(location)
         DATA = get_weather(location)
         STATUS = f"{location} not found"
-        return render_template('index.html', status=STATUS) if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass) 
+        if type(DATA) != RuntimeError:
+            search_result = Quick_search.create_quick_search(location, location_list)
+            if session.get("user_id") != None:
+                print(search_result)
+                Quick_search.write_quick_search_buffer(search_result)
+                search_result = Quick_search.query_quick_search()
+            else:
+                search_result = {"Unknown" : search_result}
+        return render_template('index.html', status=STATUS) if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week,
+         compass=compass, search_result=search_result) 
     else:
         return render_template("index.html")
+
+
+class Quick_search():
+    """Manages quick search info, saves into buffer, queries info on call, deletes"""
+
+    def write_quick_search_buffer(search_result):
+        if session.get("user_id") in temp_storage:
+            for i in temp_storage:
+                print(i)
+                if session.get("user_id") in i:
+                    i.update({session.get("user_id") : search_result})
+                    return temp_storage
+        if session.get("user_id") not in temp_storage:
+            temp_storage.append({session.get("user_id") : search_result})
+            print(temp_storage)
+        return temp_storage
+    
+    def clear_buffer():
+        if session.get("user_id") in temp_storage:
+            temp_storage.pop(session.get("user_id"))
+            return True
+        return False
+
+    def create_quick_search(location, location_list):
+        if location_list[0]["search_0"] != location and location_list[1]["search_1"] != location and location_list[2]["search_2"] != location:
+            if location_list[0]["search_0"] == None:
+                location_list[0].update({"search_0" : location})
+            elif location_list[0]["search_0"] != None and location_list[1]["search_1"] == None:
+                location_list[1].update({"search_1" : location_list[0]["search_0"]})
+                location_list[0] = ({"search_0" : location})
+            else:
+                location_list[2].update({"search_2":location_list[1]["search_1"]})
+                location_list[1].update({"search_1":location_list[0]["search_0"]})
+                location_list[0] = ({"search_0" : location})
+        return location_list
+    
+    def query_quick_search():
+        if session.get("user_id") != None and session.get("user_id") in temp_storage:
+            for i in temp_storage:
+                if i.get(session["user_id"]):
+                    return {session["user_id"]:i}
+            return {"Unknown": location_list}
+        return {"Unknown": location_list}
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -74,6 +128,7 @@ def login():
 @login_required
 @app.route("/logout", methods=["GET"])
 def logout():
+    Quick_search.clear_buffer()
     session.pop("user_id", None)
     return redirect("/")
 
@@ -90,6 +145,7 @@ def delete():
         user = Accounts(session["email"], request.form.get("password"))
         if user.user_verification():
             user.delete()
+            Quick_search.clear_buffer()
             session.pop("user_id", None)
             return redirect("/")
         return redirect("/delete")
@@ -118,6 +174,8 @@ def track():
     #regex removes <'" ()> from request.form.get("location") value
     filter = """['" ()]"""
     if request.method == "POST" and check_session(request.form.get("location")) == None:
+        search_result = Quick_search.query_quick_search()
+        print()
         session.pop("track", None)
         session.pop("track_name", None)
         location_name = re.sub(filter,"",request.form.get("location")).split(",")[0]
@@ -128,7 +186,7 @@ def track():
         DATA = get_weather(location_name)
         if set_up_track(session["user_id"], location_id) and type(DATA) != RuntimeError:
             send_gmail(compose_weather_mail_msg(DATA), session["email"])
-        return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass) 
+        return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
     return redirect("/")
 
 
@@ -136,12 +194,16 @@ def track():
 @app.route("/stop_track", methods=["POST"])
 def stop_track():
     if request.method == "POST":
+        search_result = Quick_search.query_quick_search()
         session.pop("track", None)
         session.pop("track_name", None)
         if stop_tracking(session["user_id"]):
             location_name = request.form.get("location")
             DATA = get_weather(location_name)
-            return redirect("/") if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass) 
+            print("test")
+            print(search_result)
+            print("test1")
+            return redirect("/") if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
     return redirect("/")
 
 
@@ -149,8 +211,9 @@ def stop_track():
 def check_session(location):
     filter = """['" ()]"""
     try:
-        if session["track"] == re.sub(filter,"",location).split(",")[1]:
+        if session.get("track") == re.sub(filter,"",location).split(",")[1]:
             return True
+        return None
     except: return None
 
 

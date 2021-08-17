@@ -51,10 +51,37 @@
             </div>
         </nav>
         <div class='container-fluid' id="container_search">
-            <form class="d-flex" action="/" method="POST">
-                <input class="form-control me-2" type="text" name="location" placeholder="Search" aria-label="Search">
-                <button type="submit" class="btn btn-outline-dark">Search</button>
-            </form>
+            <div class="quick_search_container_main">
+                <form class="d-flex" action="/" method="POST">
+                    <input class="form-control me-2" id="form_main" type="text" name="location" placeholder="Search" aria-label="Search">
+                    <button type="submit" class="btn btn-outline-dark">Search</button>
+                </form>
+                <div class="break"></div>
+                <div class="flex-container" id="quick_search_container">
+                    {% if search_result %}
+                    {% for i in search_result.values() %}
+                        {% set search=i %}
+                        {% if search[0]["search_0"] != False %}
+                            <form class="quick_search_form" action="/" method="POST">
+                                <button type="submit" class="quick_search_btn" method="POST" name="location" value="{{search[0]['search_0']}}">{{ search[0]["search_0"] }}</button>
+                            </form>
+                        {% endif %}
+                        {% set search1=i %}
+                        {% if search1[1]["search_1"] != False %}
+                            <form class="quick_search_form" id="quick_search_form1" action="/" method="POST">
+                                <button type="submit" class="quick_search_btn" method="POST"name="location" value="{{search1[1]['search_1']}}">{{ search1[1]["search_1"] }}</button>
+                            </form>
+                        {% endif %}
+                        {% set search2=i %}
+                        {% if search2[2]["search_2"] != False %}
+                            <form class="quick_search_form" id="quick_search_form2" action="/" method="POST">
+                                <button type="submit" class="quick_search_btn" method="POST" name="location" value="{{ search2[2]['search_2'] }}">{{ search2[2]["search_2"] }}</button>
+                            </form>
+                        {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
         </div>
         {% if status %}
             <div class="q_status">{{ status }}</div>
@@ -117,15 +144,17 @@
         <div class="location-info">
             <label class="location-name">{{data[0][0][1]['Location']}} Id: {{data[0][0][1]['ID']}} Lat: {{data[0][0][1]['Lat']}} Lon: {{data[0][0][1]['Lon']}}</label>
         </div>
-        <div class="track">
-            <form class="track" action="/track" method="POST">
-            <button class="btn-track" id="btn-track" type="submit" aria-expanded="false" title="Send to Email" name="location" value="{{data[0][0][1]['Location'],data[0][0][1]['ID']}}">
-                <i class="bi bi-envelope-fill"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-envelope-fill" viewBox="0 0 16 16">
-                    <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555zM0 4.697v7.104l5.803-3.558L0 4.697zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757zm3.436-.586L16 11.801V4.697l-5.803 3.546z"/>
-                </svg></i> Track
-            </button>
-        </form>
-        </div>
+        {% if session.user_id %}
+            <div class="track">
+                <form class="track" action="/track" method="POST">
+                <button class="btn-track" id="btn-track" type="submit" aria-expanded="false" title="Send to Email" name="location" value="{{data[0][0][1]['Location'],data[0][0][1]['ID']}}">
+                    <i class="bi bi-envelope-fill"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-envelope-fill" viewBox="0 0 16 16">
+                        <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555zM0 4.697v7.104l5.803-3.558L0 4.697zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757zm3.436-.586L16 11.801V4.697l-5.803 3.546z"/>
+                    </svg></i> Track
+                </button>
+            </form>
+            </div>
+        {% endif %}
     </div>
         {% endif %}
     </div>
