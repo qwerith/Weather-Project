@@ -1,3 +1,62 @@
+:root {
+    --main-bg-color: #f8f9fa;
+    --primary-color: white;
+    --secondary-color: black;
+    --third-color: #212529;
+    --froth-color: transparent;
+    --fifth-color: #dee2e6;
+    --sixth-color: #f8f9fa;
+}
+
+.dark-theme{
+    --main-bg-color: #0d1117;
+    --primary-color: #0d1117;
+    --secondary-color: white;
+    --third-color: #f8f9fa;
+    --fifth-color: #212529;
+    --sixth-color: #212529;
+}
+
+.links > .btn{
+    padding: 0 0 3px 0;
+    margin-left: 50px;
+    margin-right: 19px;
+}
+
+#body_main {
+    background-color: var(--main-bg-color);
+}
+
+#dark_theme_btn {
+    color: white;
+    border: solid 2px #212529;
+    background: transparent;
+    padding: 0;
+    border-radius: 50%;
+    margin-right: -20px;
+}
+
+#dark_theme:hover{
+    cursor: pointer;
+}
+
+.theme-btn {
+    display: inline-block;
+    position: relative;
+    text-decoration: none;
+    outline: none;
+    color: white;
+    font-weight: bold;
+    padding: 0 0 1px 0;
+    right: 100%;
+}
+
+#icon {
+    border-color: white;
+    margin: 4px;
+    padding: 0;
+}
+
 .container-fluid {
     padding: 50px 0 50px 0;
     display: flex;
@@ -28,9 +87,32 @@
     width: 50%;
 }
 
+#table-dark > tr > th{
+    border-bottom-width: 0;
+}
+
 #table_row > td {
     vertical-align: middle;
+    background-color: var(--primary-color);
+    border-color: var(--fifth-color);
+    color: var(--secondary-color);
 }
+
+.location-credentials {
+    color: var(--secondary-color);
+}
+
+#btn_search_main {
+    background-color: var(--sixth-color);
+    color: var(--secondary-color);
+}
+
+#btn_search_main:hover {
+    background-color: #212529;
+    border-color: var(--third-color);
+    color: white;
+}
+
 
 .container-fluid > nav {
     display: flex;
@@ -46,6 +128,10 @@
 
 .tab-content {
     margin-top: -100px;
+}
+
+#nav-tab {
+    border-color: var(--froth-color);
 }
 
 #nav-home-tab:focus {
@@ -79,27 +165,37 @@
 }
 
 #nav-home-tab {
-    color: black;
+    background-color: var(--main-bg-color);
+    border-color: var(--froth-color);
+    color: var(--secondary-color);
     min-width: 130px;
 }
 
-#nav-profile-tab{
-    color: black;
+#nav-profile-tab {
+    background-color: var(--main-bg-color);
+    border-color: var(--froth-color);
+    color: var(--secondary-color);
     min-width: 130px;
 }
 
-#nav-contact-tab {  
-    color: black;
+#nav-contact-tab {
+    background-color: var(--main-bg-color); 
+    border-color: var(--froth-color);
+    color: var(--secondary-color);
     min-width: 130px;
 }
 
 #nav-contact1-tab {
-    color: black;
+    background-color: var(--main-bg-color);
+    border-color: var(--froth-color);
+    color: var(--secondary-color);
     min-width: 130px;
 }
 
 #nav-contact2-tab {
-    color: black;
+    background-color: var(--main-bg-color);
+    border-color: var(--froth-color);
+    color: var(--secondary-color);
     min-width: 130px;
 }
 
@@ -139,7 +235,7 @@
 
 .dropdown {
     position: absolute;
-    padding: 0 150px 1px 0;
+    padding: 0 120px 1px 0;
 }
 
 #dropdownMenu2 {
@@ -187,7 +283,7 @@
 }
 
 .arrow {
-    border: solid black;
+    border: solid var(--secondary-color);
     border-width: 0 3px 3px 0;
     display: inline-block;
     padding: 3px;
@@ -206,13 +302,18 @@
 }
 
 .location-info {
-    display: flex;
+    display: inline-block;
     width: 83%;
-    justify-content: center;
+    text-align: center;
 }
 
-.location-name {
+.location-credentials {
     margin-top: -15px;
+}
+
+#location-name {
+    font-weight: bold;
+    color: var(--secondary-color)
 }
 
 .track {
@@ -229,9 +330,9 @@
 }
 
 #btn-track {
-    margin-top: -16px;
+    margin-top: 0;
     margin-right: -45px;
-    color: #212529;
+    color: var(--third-color);
     text-decoration: none;
     background-color: inherit;
     border: none;
@@ -245,7 +346,7 @@
     margin-right: -45px;
     color: white;
     text-decoration: none;
-    background-color: black;
+    background-color: var(--secondary-color);
     border-radius: 50px;
     font-weight: bold;
     padding-top: 0;
@@ -257,6 +358,7 @@
 }
 
 .quick_search_btn {
+    color: var(--secondary-color);
     max-width: auto;
     background: none;
     text-decoration: none;
@@ -297,4 +399,22 @@
 form {
     width: 100%;
 }
+
+#nav-tab > .active {
+    background-color:#212529;
+    color: white;
+}
+
+#logo {
+    font-family: 'Exo', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 110%;
+    color: white;
+    margin: 0 0 0 -70%;
+    padding: 0 10px 3px 10px;
+}
+
+
 

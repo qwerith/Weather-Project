@@ -14,15 +14,27 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
     <title>MyWeatherApp</title>
 </head>
-<body>
+<body id="body_main">
     <div class="container" id="container">
         <nav class="navbar navbar-dark bg-dark" id="navbar">
             <div class="d-flex flex-row bd-highlight mb-3"></div>
-                <div class="links">
+            <a id="logo" href="/" title="Home">MyWeatherApp</a>
                     {% if not session.user_id %}
+                    <div class="links">
+                        <div class="theme-btn">
+                            <button class="btn btn-secondary" type="button" id="dark_theme_btn" title="Dark Theme">
+                            <img class="bi bi-moon" id="icon" src="/static/images/moon.png" alt="Image Error" id="dark_theme" width="22" height="22">
+                            </button>
+                        </div>
                         <a class="btn btn-outline-dark" type="button" id="logut_btn" href="/login">Login</a>
+                    </div>
                     {% else %}
                     <div class="dropdown">
+                        <div class="theme-btn">
+                            <button class="btn btn-secondary" type="button" id="dark_theme_btn" title="Dark Theme">
+                            <img class="bi bi-moon" id="icon" src="/static/images/moon.png" alt="Image Error" id="dark_theme" width="22" height="22">
+                            </button>
+                        </div>
                         <button class="btn btn-secondary" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false" title={{session.email}}>
                             <i class="bi bi-person"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
                             <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
@@ -54,7 +66,7 @@
             <div class="quick_search_container_main">
                 <form class="d-flex" action="/" method="POST">
                     <input class="form-control me-2" id="form_main" type="text" name="location" placeholder="Search" aria-label="Search">
-                    <button type="submit" class="btn btn-outline-dark">Search</button>
+                    <button type="submit" class="btn btn-outline-dark" id="btn_search_main">Search</button>
                 </form>
                 <div class="break"></div>
                 <div class="flex-container" id="quick_search_container">
@@ -87,6 +99,7 @@
             <div class="q_status">{{ status }}</div>
         {% endif %}
         {% if data %}
+        <div class="veiw-main">
         <div class="container-fluid">
             <nav>
                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -139,24 +152,55 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="location">
-        <div class="location-info">
-            <label class="location-name">{{data[0][0][1]['Location']}} Id: {{data[0][0][1]['ID']}} Lat: {{data[0][0][1]['Lat']}} Lon: {{data[0][0][1]['Lon']}}</label>
-        </div>
-        {% if session.user_id %}
-            <div class="track">
-                <form class="track" action="/track" method="POST">
-                <button class="btn-track" id="btn-track" type="submit" aria-expanded="false" title="Send to Email" name="location" value="{{data[0][0][1]['Location'],data[0][0][1]['ID']}}">
-                    <i class="bi bi-envelope-fill"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-envelope-fill" viewBox="0 0 16 16">
-                        <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555zM0 4.697v7.104l5.803-3.558L0 4.697zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757zm3.436-.586L16 11.801V4.697l-5.803 3.546z"/>
-                    </svg></i> Track
-                </button>
-            </form>
+        <div class="location">
+            <div class="location-info">
+                <label id="location-name">{{data[0][0][1]['Location']}}</label>
+                <label class="location-credentials">Id: {{data[0][0][1]['ID']}} Lat: {{data[0][0][1]['Lat']}} Lon: {{data[0][0][1]['Lon']}}</label>
             </div>
-        {% endif %}
+            {% if session.user_id %}
+                <div class="track">
+                    <form class="track" action="/track" method="POST">
+                    <button class="btn-track" id="btn-track" type="submit" aria-expanded="false" title="Send to Email" name="location" value="{{data[0][0][1]['Location'],data[0][0][1]['ID']}}">
+                        <i class="bi bi-envelope-fill"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-envelope-fill" viewBox="0 0 16 16">
+                            <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555zM0 4.697v7.104l5.803-3.558L0 4.697zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757zm3.436-.586L16 11.801V4.697l-5.803 3.546z"/>
+                        </svg></i> Track
+                    </button>
+                </form>
+                </div>
+            {% endif %}
+        </div>
+            {% endif %}
+        </div>
     </div>
-        {% endif %}
-    </div>
+<script>
+    var icon = document.getElementById("icon");
+
+    if(localStorage.getItem("theme") == null){
+            localStorage.setItem("theme", "light");
+        }
+
+    let localData = localStorage.getItem("theme");
+
+    if(localData == "light"){
+        icon.src="/static/images/moon.png";
+        document.body.classList.remove("dark-theme");
+    }
+    else if(localData == "dark"){
+        icon.src="/static/images/sun.svg";
+        document.body.classList.add("dark-theme");
+    }
+
+    icon.onclick = function() {
+        document.body.classList.toggle("dark-theme");
+        if(document.body.classList.contains("dark-theme")){
+            icon.src="/static/images/sun.svg"
+            localStorage.setItem("theme", "dark");
+
+        } else {
+            icon.src="/static/images/moon.png"
+            localStorage.setItem("theme", "light");
+        }
+    }
+</script>
 </body>
 </html>

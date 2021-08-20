@@ -206,21 +206,18 @@ class Quick_search():
     """Manages quick search info, saves into buffer, queries info on call, deletes"""
 
     def write_quick_search_buffer(search_result):
-        if session.get("user_id") in temp_storage:
-            for i in temp_storage:
-                print(i)
-                if session.get("user_id") in i:
-                    i.update({session.get("user_id") : search_result})
-                    return temp_storage
-        if session.get("user_id") not in temp_storage:
-            temp_storage.append({session.get("user_id") : search_result})
-            print(temp_storage)
+        for i in temp_storage:
+            if i.get(session.get("user_id")):
+                i.update({session.get("user_id") : search_result})
+                return temp_storage
+        temp_storage.append({session.get("user_id") : search_result})
         return temp_storage
     
     def clear_buffer():
-        if session.get("user_id") in temp_storage:
-            temp_storage.pop(session.get("user_id"))
-            return True
+        for i in temp_storage:
+            if i.get(session.get("user_id")):
+                i.pop(session.get("user_id"))
+                return True
         return False
 
     def create_quick_search(location, location_list):
