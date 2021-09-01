@@ -58,17 +58,20 @@
 }
 
 .container-fluid {
-    padding: 50px 0 50px 0;
+    padding: 50px 12px 29px 12px;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: left;
+    align-items: left;
+    width: 100%;
 }
 
 .q_status {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: -50px;
+    margin-top: -25px;
+    margin-left: -50px;
+    color: var(--third-color);
 }
 
 .d-flex > input {
@@ -84,7 +87,7 @@
 
 .container-fluid > .table {
     text-align: center;
-    width: 50%;
+    width: 100%;
 }
 
 #table-dark > tr > th{
@@ -113,17 +116,23 @@
     color: white;
 }
 
+#container_nav {
+    padding: 0 12px 50px 12px;
+    display: flex;
+    justify-content: left;
+    align-items: left;
+    width: 100%;
+}
 
 .container-fluid > nav {
     display: flex;
-    justify-content: center;
-    text-align: center;
-    align-items: center;
+    justify-content: left;
+    text-align: left;
     width: 100%;
 }
 
 .container-fluid > nav > div {
-    width: 50%;
+    width: 100%;
 }
 
 .tab-content {
@@ -222,13 +231,13 @@
 }
 
 #container {
-    position: fixed;
+    position: relative;
     max-width: 100%;
     padding: 0;
 }
 
 #container_search {
-    padding-top: 5%;
+    padding-top: 2.5%;
     flex-wrap: wrap;
     padding-bottom: 25px;
 }
@@ -295,7 +304,7 @@
 
 .location {
     display: flex;
-    width: auto;
+    width: 100%;
     padding: 0 25% 0 25%;
     margin-top: -15px;
     justify-content: center;
@@ -313,14 +322,14 @@
 
 #location-name {
     font-weight: bold;
+    padding-bottom: 10px;
     color: var(--secondary-color)
 }
 
 .track {
+    display: inline-block;
     position: relative;
-    display: flex;
     width: auto;
-    justify-content: flex-end;
 }
 
 .track-dropdown {
@@ -330,8 +339,7 @@
 }
 
 #btn-track {
-    margin-top: 0;
-    margin-right: -45px;
+    margin-top: -7px;
     color: var(--third-color);
     text-decoration: none;
     background-color: inherit;
@@ -339,14 +347,13 @@
     font-weight: bold;
     padding-top: 0;
     padding-bottom: 2px;
+    padding-left: 10px;
 }
 
 #btn-track:active {
-    margin-top: -15px;
-    margin-right: -45px;
     color: white;
     text-decoration: none;
-    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
     border-radius: 50px;
     font-weight: bold;
     padding-top: 0;
@@ -405,15 +412,70 @@ form {
     color: white;
 }
 
+#logo_container_position {
+    position: absolute;
+    width: auto;
+    float: left;
+}
+
+#logo_container {
+    position: relative;
+}
+
 #logo {
+    position: relative;
     font-family: 'Exo', sans-serif;
     font-weight: bold;
     cursor: pointer;
     text-decoration: none;
     font-size: 110%;
     color: white;
-    margin: 0 0 0 -70%;
+    margin: 0 0 0 50%;
     padding: 0 10px 3px 10px;
+}
+
+#view_main {
+    display: flex;
+    flex-flow:column nowrap;
+}
+
+.view-main-left {
+    width: 50%;
+    float: left;
+}
+
+.view-main-right {
+    width: 50%;
+    float: right;
+}
+
+.view-main-bottom {
+    bottom: 10%;
+    width: 100%;
+}
+
+#container_map {
+    position: relative;
+    padding: 0 12px 45px 12px;
+    display: flex;
+    justify-content: right;
+    align-items: right;
+    width: 100%;
+    min-width: 467px;
+}
+
+.container-fluid > #map {
+    padding: 50px 12px 50px 12px;
+    display: flex;
+    justify-content: right;
+    align-items: right;
+    width: 100%;
+    margin-top: 66px;
+}
+
+#map {
+    height: 547px;
+    width: 100%;
 }
 
 
