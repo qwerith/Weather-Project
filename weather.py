@@ -72,8 +72,8 @@ def get_weather(location_input):
     if check[0] == None:
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?{location_input}&units=metric&appid={API_KEY}")
         print(request.status_code)
-        #parsed = request.json()
-        #print(json.dumps(parsed, indent=4, sort_keys=True))
+        parsed = request.json()
+        print(json.dumps(parsed, indent=4, sort_keys=True))
         if request.status_code != 200:
             return RuntimeError("Request failed", request.status_code)
         else:
@@ -181,5 +181,5 @@ class Cache():
         return Cache.parse_database_response(query_result)
         
 
-#result = get_weather("Lutsk")
-#print(result)
+result = get_weather("Lutsk")
+print(result)

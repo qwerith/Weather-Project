@@ -18,6 +18,7 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
     integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
     crossorigin=""></script>
+    <script type="text/javascript" src="/static/map.js"> console.log('file is required'); </script>
     <title>MyWeatherApp</title>
 </head>
 <body id="body_main">
@@ -191,12 +192,13 @@
                     </div>
                 </div>
             </div>  
-        {% endif %} 
+        {% endif %}
+
     
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
 <script>
-    window.onresize = function getWindowSize(){
+    window.onresize = function getWindowSize() {
     var width = $(window).width();
     if (width < 1200) {
         document.getElementById("view-main").style.flexFlow = "column nowrap";
@@ -217,39 +219,38 @@
         maxZoom: 15,
         minZoom: 9,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }),
+        
+        }),
+        Temp = L.tileLayer('http://127.0.0.1:5000/map/tile_name=temp_new/z=10/x={{lat}}/y={{lon}}', {
+            maxZoom: 15,
+            minZoom: 9,
+            attribution: '&copy; <a href="http://owm.io">VANE</a>',
+        }),
+
+        Precipitation = L.tileLayer('http://127.0.0.1:5000/map/tile_name=precipitation_new/z=10/x={{lat}}/y={{lon}}', {
+            maxZoom: 15,
+            minZoom: 9,
+            attribution: '&copy; <a href="http://owm.io">VANE</a>'
+        }),
+
+        Wind = L.tileLayer('http://127.0.0.1:5000/map/tile_name=wind_new/z=10/x={{lat}}/y={{lon}}', {
+            maxZoom: 15,
+            minZoom: 9,
+            attribution: '&copy; <a href="http://owm.io">VANE</a>'
+        }),
+
+        Pressure = L.tileLayer('http://127.0.0.1:5000/map/tile_name=pressure_new/z=10/x={{lat}}/y={{lon}}', {
+            maxZoom: 15,
+            minZoom: 9,
+            attribution: '&copy; <a href="http://owm.io">VANE</a>'
+        }),
 
 
-    Temp = L.tileLayer('http://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=API_KEY', { // Weather API KEY needed !!!
-        maxZoom: 15,
-        minZoom: 9,
-        attribution: '&copy; <a href="http://owm.io">VANE</a>',
-    }),
-
-    Precipitation = L.tileLayer('http://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=API_KEY', {
-        maxZoom: 15,
-        minZoom: 9,
-        attribution: '&copy; <a href="http://owm.io">VANE</a>'
-    }),
-
-    Wind = L.tileLayer('http://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=API_KEY', {
-        maxZoom: 15,
-        minZoom: 9,
-        attribution: '&copy; <a href="http://owm.io">VANE</a>'
-    }),
-
-    Pressure = L.tileLayer('http://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=API_KEY', {
-        maxZoom: 15,
-        minZoom: 9,
-        attribution: '&copy; <a href="http://owm.io">VANE</a>'
-    }),
-
-
-    Clouds = L.tileLayer('http://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=API_KEY', {
-        maxZoom: 15,
-        minZoom: 9,
-        attribution: '&copy; <a href="http://owm.io">VANE</a>'
-    });
+        Clouds = L.tileLayer('http://127.0.0.1:5000/map/tile_name=clouds_new/z=10/x={{lat}}/y={{lon}}', {
+            maxZoom: 15,
+            minZoom: 9,
+            attribution: '&copy; <a href="http://owm.io">VANE</a>'
+        });
 
     baseMaps.addTo(map);
     Precipitation.addTo(map);

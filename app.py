@@ -1,17 +1,25 @@
-import os, re
+import os, re, requests
 from flask import Flask, redirect, request, session, render_template, flash, url_for
 from weather import get_weather
 from accounts import Accounts, input_validation, login_required, generate_temporary_password
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv, find_dotenv
 from mailing import send_gmail, day_of_week, set_up_track, compose_weather_mail_msg, stop_tracking, compose_recovery_mail_msg
+from flask import Response
 
+# Map-tiles url
+url_root = "http://tile.openweathermap.org/map" 
 temp_storage = []
 location_list = [{"search_0" : False}, {"search_1" : False}, {"search_2" : False}]
 load_dotenv(find_dotenv())
 secret_key = os.getenv("FLASK_SECRET_KEY")
+
 if not secret_key:
     raise RuntimeError("Flask secret key error")
+
+app_key = os.getenv("OWM_MAP_KEY")
+if not app_key:
+    raise RuntimeError("OWM map key error")
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -195,11 +203,22 @@ def stop_track():
         if stop_tracking(session["user_id"]):
             location_name = request.form.get("location")
             DATA = get_weather(location_name)
-            print("test")
             print(search_result)
-            print("test1")
             return redirect("/") if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
     return redirect("/")
+
+
+@app.route("/map/<tile_name>/<z>/<x>/<y>")
+def get_tile(tile_name,z,x,y):
+    print(tile_name,z,x,y)
+    tile_name = tile_name.split("=")[1]
+    z = int(float(z.split("=")[1]))
+    x = int(float(x.split("=")[1]))
+    y = int(float(y.split("=")[1]))
+    req = requests.get(f"{url_root}/{tile_name}/{z}/{x}/{y}.png?appid={app_key}")
+    if req.status_code != 200:
+        print("Map request error")
+    return Response(req.content, content_type = req.headers['content-type'])
 
 
 class Quick_search():
