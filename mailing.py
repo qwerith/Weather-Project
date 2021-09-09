@@ -38,7 +38,8 @@ def create_html_table_rows(data):
             table_row = f"""<tr>
                                 <td style="padding: 0 10px;">{data[0][count][0].split(" ")[1][:5]}</td>
                                 <td style="padding: 0 5%;min-width:160px;"> {data[0][count][1]["min_temp"]} / {data[0][count][1]["max_temp"]}°</td>
-                                <td style="padding: 0 5%;"> {data[0][count][1]["humidity"]}% </td>
+                                <td style="padding: 0 5%;">{data[0][count][1]["humidity"]}%</td>
+                                <td style="padding: 0 5%;">{data[0][count][1]["pop"]}%</td>
                                 <td style="padding: 0 10px;">{data[0][count][1]["conditions"]}</td>
                                 <td style="padding: 0 10px;"><img src="http://openweathermap.org/img/wn/{data[0][count][1]["picture_name"]}@2x.png"alt=""style="width:50px;height:50px;"></td>
                                 <td style="padding: 0 10px;">{data[0][count][1]["wind_speed"]} m/s</td>
@@ -127,8 +128,9 @@ def compose_weather_mail_msg(data):
                             <tr>
                                 <th style="padding: 0 10px;">Time </th>
                                 <th style="padding: 0 10px;"> Temperature°C </th>
-                                <th style="padding: 0 10px;"> Humidity </th>
-                                <th style="padding: 0 10px;"> Conditions </th>
+                                <th style="padding: 0 10px;"> Humidity</th>
+                                <th style="padding: 0 10px;">Precipitation</th>
+                                <th style="padding: 0 10px;">Conditions </th>
                                 <th></th>
                                 <th style="padding: 0 10px 0 0;">Wind</th>
                             </tr>
@@ -139,6 +141,7 @@ def compose_weather_mail_msg(data):
                             {snippet[2]}
                             {snippet[3]}
                             {snippet[4]}
+                            {snippet[5]}
                         </tbody>
                 </table>
             </div>
