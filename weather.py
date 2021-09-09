@@ -19,9 +19,9 @@ if not API_KEY:
 class Parse_var(Enum):
     """Used to store parameters for different functions in one place"""
     API_RES_PARAMS = [["dt"], ["main","temp_min"], ["main","temp_max"],["main","humidity"],
-        ["weather", 0,"description"], ["wind", "deg"], ["weather", 0, "icon"], ["wind", "speed"]]
+        ["weather", 0,"description"], ["wind", "deg"], ["weather", 0, "icon"], ["wind", "speed"], ["pop"]]
     # "" Not used, added to list because it needs to be of certain length
-    DB_RES_KEYS = ["min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed", "ID", "Location", "Lat", "Lon", ""]
+    DB_RES_KEYS = ["min_temp", "max_temp", "humidity", "conditions", "picture_name", "wind", "wind_speed", "ID", "Location", "Lat", "Lon", "country", "sunrise", "sunset", "timezone", "pop", ""]
 
 
 #converts input value to request string
@@ -72,8 +72,8 @@ def get_weather(location_input):
     if check[0] == None:
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?{location_input}&units=metric&appid={API_KEY}")
         print(request.status_code)
-        parsed = request.json()
-        print(json.dumps(parsed, indent=4, sort_keys=True))
+        #parsed = request.json()
+        #print(json.dumps(parsed, indent=4, sort_keys=True))
         if request.status_code != 200:
             return RuntimeError("Request failed", request.status_code)
         else:
@@ -96,10 +96,12 @@ class Cache():
             coords = get_coords_or_name(location_input, request_data)
             location_name = location_input[2: ]
         db_location = [request_data["city"]["id"], location_name, coords.split("&")[0].split("=")[1], 
-        coords.split("&")[1].split("=")[1], datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')]
+        coords.split("&")[1].split("=")[1], datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), request_data["city"]["country"], 
+        request_data["city"]["sunrise"], request_data["city"]["sunset"], int((int(request_data["city"]["timezone"])/60)/60)]
         try:
-            cur.execute("INSERT INTO location (id, location_name, lat, lon, request_date) VALUES (%s, %s, %s, %s, %s)",
-            (db_location[0], db_location[1], db_location[2], db_location[3], db_location[4]))
+            print(datetime.fromtimestamp(request_data["city"]["sunset"]))
+            cur.execute("INSERT INTO location (id, location_name, lat, lon, request_date, country, sunrise, sunset, timezone) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (db_location[0], db_location[1], db_location[2], db_location[3], db_location[4], db_location[5], db_location[6], db_location[7], db_location[8]))
             con.commit()
         except: raise RuntimeError("Internal Error")
 
@@ -116,6 +118,8 @@ class Cache():
                 elif length == 3:
                     temp_list.append(i[p[0]][p[1]][p[2]]) 
                 else:
+                    if p == "pop":
+                        i[p[0]] = int(i[p[0]])
                     temp_list.append(i[p[0]])
             db_weather.append(temp_list)
         #print(db_weather)
@@ -125,16 +129,17 @@ class Cache():
     #updates "reques_date" row in "location" table if weather data is outdated
     def write_weather(request_data, status):
         count = 0
-        command = """INSERT INTO weather (date, min_temp, max_temp, humidity, conditions, wind, picture_name, location_id, wind_speed) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        command = """INSERT INTO weather (date, min_temp, max_temp, humidity, conditions, wind, picture_name, location_id, wind_speed, pop) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         location_id = request_data["city"]["id"]
         db_weather = Cache.parse_api_response(request_data)
         #exists = cur.execute("SELECT EXISTS(SELECT 1 FROM weather WHERE location_id = %s LIMIT 1)",(location_id,))
         if status == "outdated":
             cur.execute("DELETE FROM weather WHERE location_id=%s", (location_id,))
-            cur.execute("UPDATE location SET request_date = %s WHERE id = %s", ((datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), location_id)))
+            cur.execute("UPDATE location SET request_date = %s, sunrise = %s, sunset = %s WHERE id = %s", ((datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), 
+            request_data["city"]["sunrise"], request_data["city"]["sunset"], location_id)))
         for i in db_weather:
             cur.execute(command,(datetime.fromtimestamp(db_weather[count][0]), db_weather[count][1], db_weather[count][2],
-            db_weather[count][3], db_weather[count][4], db_weather[count][5], db_weather[count][6], location_id, db_weather[count][7]))
+            db_weather[count][3], db_weather[count][4], db_weather[count][5], db_weather[count][6], location_id, db_weather[count][7], db_weather[count][8]))
             count += 1  
         con.commit()
 
@@ -149,7 +154,7 @@ class Cache():
             temp_dict = {}
             date = i[0].strftime('%Y-%m-%d %H:%M:%S')
             for char in i[1:]:
-                if type(char) != int:
+                if type(char) != int and type(char) != float:
                     #normalises string data by removing whitespaces
                     char = char.lstrip(" ").rstrip(" ")
                     if "."  in char and len(char) == 4:
@@ -174,12 +179,12 @@ class Cache():
 
     #queries "location" and "weather" tables for data
     def read(id):
-        cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions, picture_name, wind, wind_speed, location_id, location_name, lat, lon 
+        cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions, picture_name, wind, wind_speed, location_id, location_name, lat, lon, country, sunrise, sunset, timezone, pop 
         FROM weather INNER JOIN location ON weather.location_id=location.id WHERE location_id=%s ORDER BY date ASC""", (id, ))
         query_result = cur.fetchall()
         con.commit()
         return Cache.parse_database_response(query_result)
         
 
-result = get_weather("Lutsk")
-print(result)
+#result = get_weather("Drohobych")
+#print(result)

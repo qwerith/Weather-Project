@@ -6,6 +6,7 @@ from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv, find_dotenv
 from mailing import send_gmail, day_of_week, set_up_track, compose_weather_mail_msg, stop_tracking, compose_recovery_mail_msg
 from flask import Response
+from datetime import datetime, timedelta
 
 # Map-tiles url
 url_root = "http://tile.openweathermap.org/map" 
@@ -35,6 +36,7 @@ def index():
         DATA = get_weather(location)
         STATUS = f"{location} not found"
         if type(DATA) != RuntimeError:
+            DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
             search_result = Quick_search.create_quick_search(location, location_list)
             if session.get("user_id") != None:
                 print(search_result)
@@ -187,6 +189,8 @@ def track():
         session["track"] = location_id
         session["track_name"] = location_name
         DATA = get_weather(location_name)
+        if type(DATA) != RuntimeError:
+            DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
         if set_up_track(session["user_id"], location_id) and type(DATA) != RuntimeError:
             send_gmail(compose_weather_mail_msg(DATA), session["email"])
         return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
@@ -203,6 +207,8 @@ def stop_track():
         if stop_tracking(session["user_id"]):
             location_name = request.form.get("location")
             DATA = get_weather(location_name)
+            if type(DATA) != RuntimeError:
+                DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
             print(search_result)
             return redirect("/") if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
     return redirect("/")
@@ -269,6 +275,20 @@ def check_session(location):
             return True
         return None
     except: return None
+
+
+def convert_timestamp(data, utc_difference):
+    sunrise = datetime.fromtimestamp(int(data[0][0][1]['sunrise']))
+    sunset = datetime.fromtimestamp(int(data[0][0][1]['sunset']))
+    difference_in_hours = timedelta(hours = int(utc_difference))
+    sunrise = (sunrise + difference_in_hours).strftime('%H:%M')
+    sunset = (sunset + difference_in_hours).strftime('%H:%M')
+    data[0][0][1]['sunrise'] = sunrise
+    data[0][0][1]['sunset'] = sunset
+    if int(utc_difference) > 0:
+        data[0][0][1]['timezone'] = "+" + data[0][0][1]['timezone']
+    return data
+
 
 
 def compass(direction):

@@ -326,6 +326,27 @@
     color: var(--secondary-color)
 }
 
+.location_sun_time {
+    display: inline-block;
+    text-align: center;
+    position: absolute;
+    width: auto;
+}
+
+#location_sunrise {
+    float: left;
+    color: var(--secondary-color);
+    margin-left: 50px;
+    margin-top: -12px;
+}
+
+#location_sunset {
+    float: left;
+    color: var(--secondary-color);
+    margin-left: 30px;
+    margin-top: -12px;
+}
+
 .track {
     display: inline-block;
     position: relative;

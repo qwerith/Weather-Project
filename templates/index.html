@@ -18,7 +18,6 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
     integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
     crossorigin=""></script>
-    <script type="text/javascript" src="/static/map.js"> console.log('file is required'); </script>
     <title>MyWeatherApp</title>
 </head>
 <body id="body_main">
@@ -171,10 +170,18 @@
                     </div>
                 </div>
             </div>
+            <div class="location_sun_time" id="location_sun_time">
+                <label id="location_sunrise"><i class="bi bi-sunrise-fill"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-sunrise-fill" viewBox="0 0 16 16">
+                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l1.5 1.5a.5.5 0 0 1-.708.708L8.5 2.707V4.5a.5.5 0 0 1-1 0V2.707l-.646.647a.5.5 0 1 1-.708-.708l1.5-1.5zM2.343 4.343a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 0 1-.707.707L2.343 5.05a.5.5 0 0 1 0-.707zm11.314 0a.5.5 0 0 1 0 .707l-1.414 1.414a.5.5 0 1 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zM11.709 11.5a4 4 0 1 0-7.418 0H.5a.5.5 0 0 0 0 1h15a.5.5 0 0 0 0-1h-3.79zM0 10a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 0 10zm13 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
+                  </svg></i> {{data[0][0][1]['sunrise']}}</label>
+                <label id="location_sunset"><i class="bi bi-sunset-fill"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-sunset-fill" viewBox="0 0 16 16">
+                    <path d="M7.646 4.854a.5.5 0 0 0 .708 0l1.5-1.5a.5.5 0 0 0-.708-.708l-.646.647V1.5a.5.5 0 0 0-1 0v1.793l-.646-.647a.5.5 0 1 0-.708.708l1.5 1.5zm-5.303-.51a.5.5 0 0 1 .707 0l1.414 1.413a.5.5 0 0 1-.707.707L2.343 5.05a.5.5 0 0 1 0-.707zm11.314 0a.5.5 0 0 1 0 .706l-1.414 1.414a.5.5 0 1 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zM11.709 11.5a4 4 0 1 0-7.418 0H.5a.5.5 0 0 0 0 1h15a.5.5 0 0 0 0-1h-3.79zM0 10a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 0 10zm13 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
+                  </svg></i> {{data[0][0][1]['sunset']}} &nbsp; &nbsp; UTC{{data[0][0][1]['timezone']}}</label>
+            </div>
             <div class="view-main-bottom">
                 <div class="location">
                     <div class="location-info">
-                        <label id="location-name">{{data[0][0][1]['Location']}}</label>
+                        <label id="location-name">{{data[0][0][1]['country']}} {{data[0][0][1]['Location']}}</label>
                         <label class="location-credentials">Id: {{data[0][0][1]['ID']}} Lat: {{data[0][0][1]['Lat']}} Lon: {{data[0][0][1]['Lon']}}</label>
                         {% set lat=data[0][0][1]['Lat'] %}
                         {% set lon=data[0][0][1]['Lon'] %}
@@ -191,23 +198,44 @@
                     {% endif %}
                     </div>
                 </div>
-            </div>  
+            </div>
         {% endif %}
 
-    
+
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
 <script>
+    window.onload = function getWindowSize() {
+    var width = $(window).width();
+    if (width < 1200) {
+        document.getElementById("view-main").style.flexFlow = "column nowrap";
+        document.getElementById("map").style.marginTop = "0";
+        document.getElementById("nav-tab").style.flexFlow = "column wrap";
+        document.getElementById("location_sun_time").style.position = "relative"
+        document.getElementById("location_sun_time").style.marginBottom = "50px"
+    } else {
+        document.getElementById("view-main").style.flexFlow = "row nowrap";
+        document.getElementById("map").style.marginTop = "66px";
+        document.getElementById("nav-tab").style.flexFlow = "initial";
+        document.getElementById("location_sun_time").style.position = "absolute"
+        document.getElementById("location_sun_time").style.marginBottom = "0"
+    }
+}
+
     window.onresize = function getWindowSize() {
     var width = $(window).width();
     if (width < 1200) {
         document.getElementById("view-main").style.flexFlow = "column nowrap";
         document.getElementById("map").style.marginTop = "0";
         document.getElementById("nav-tab").style.flexFlow = "column wrap";
+        document.getElementById("location_sun_time").style.position = "relative"
+        document.getElementById("location_sun_time").style.marginBottom = "50px"
     } else {
         document.getElementById("view-main").style.flexFlow = "row nowrap";
         document.getElementById("map").style.marginTop = "66px";
         document.getElementById("nav-tab").style.flexFlow = "initial";
+        document.getElementById("location_sun_time").style.position = "absolute"
+        document.getElementById("location_sun_time").style.marginBottom = "0"
     }
 }
 </script>
