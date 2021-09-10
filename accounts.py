@@ -1,15 +1,25 @@
-import psycopg2, os, re, string, random
+import psycopg2, os, re, string, random, logging
 from dotenv import load_dotenv, find_dotenv
 from flask_bcrypt import Bcrypt
 from flask import redirect, session
 bcrypt = Bcrypt()
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s:%(name)s:%(filename)s:%(funcName)s:%(levelname)s:%(message)s")
+handler = logging.FileHandler("logs.log")
+handler.setFormatter(formatter)
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
 
 #loading environment variables
 try:
     load_dotenv(find_dotenv())
     con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"), port=5431)
     cur = con.cursor()
-except: raise RuntimeError("Database credentials error")
+except RuntimeError("Database credentials error"):
+    logger.exception("Database credentials error")
+    raise
 
 
 class Accounts():

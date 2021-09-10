@@ -1,18 +1,30 @@
-import requests, os, json, re, psycopg2
+import requests, os, json, re, psycopg2, logging
 from dotenv import load_dotenv, find_dotenv
 from datetime import datetime
 from cache_check import cache_check, input_type_check
 from enum import Enum
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s:%(name)s:%(filename)s:%(funcName)s:%(levelname)s:%(message)s")
+handler = logging.FileHandler("logs.log")
+handler.setFormatter(formatter)
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
     
 #loading environment variables
 try:
     load_dotenv(find_dotenv())
     con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"), port = 5431)
     cur = con.cursor()
-except: raise RuntimeError("Database credentials error")
+except psycopg2.OperationalError as e:
+    logger.exception("Database credentials error")
+    raise RuntimeError("Database credentials error") from e
+    
 
 API_KEY = os.getenv("OWM_KEY")
 if not API_KEY:
+    logger.error("API key error")
     raise RuntimeError("API key error")
 
 
@@ -37,6 +49,7 @@ def convert_location_to_query(location):
         lat = "lat=" + str(location[0])
         lon = "&lon=" + str(location[-1])
         location = lat + lon
+    logger.info(location)
     return location
 
 
@@ -67,14 +80,17 @@ def get_weather(location_input):
     try:
         location_input = get_input(location_input)
         print(location_input)
-    except: TypeError("Invalid input")
-    check = cache_check(location_input) 
+    except TypeError:
+        logger.exception("Invalid input")
+        raise
+    check = cache_check(location_input)
     if check[0] == None:
         request = requests.get(f"http://api.openweathermap.org/data/2.5/forecast?{location_input}&units=metric&appid={API_KEY}")
         print(request.status_code)
         #parsed = request.json()
         #print(json.dumps(parsed, indent=4, sort_keys=True))
         if request.status_code != 200:
+            logger.warning(request.status_code)
             return RuntimeError("Request failed", request.status_code)
         else:
             if check[1] == "not_exists":
@@ -103,7 +119,9 @@ class Cache():
             cur.execute("INSERT INTO location (id, location_name, lat, lon, request_date, country, sunrise, sunset, timezone) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
             (db_location[0], db_location[1], db_location[2], db_location[3], db_location[4], db_location[5], db_location[6], db_location[7], db_location[8]))
             con.commit()
-        except: raise RuntimeError("Internal Error")
+        except Exception("Cache Operation Error"):
+            logger.exception("Cache Operation Error")
+            raise
 
     #parses data in particular order for further insertion into "weather" table
     def parse_api_response(request_data):
@@ -186,5 +204,5 @@ class Cache():
         return Cache.parse_database_response(query_result)
         
 
-#result = get_weather("Drohobych")
+#result = get_weather("Lutsk")
 #print(result)

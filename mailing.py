@@ -1,4 +1,4 @@
-import smtplib, os, psycopg2, re
+import smtplib, os, psycopg2, re, logging
 from smtplib import SMTPResponseException
 #from email.message import EmailMessage
 from dotenv import load_dotenv, find_dotenv
@@ -6,18 +6,29 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s:%(name)s:%(filename)s:%(funcName)s:%(levelname)s:%(message)s")
+handler = logging.FileHandler("logs.log")
+handler.setFormatter(formatter)
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
+
 
 #loading environment variables
 try:
     load_dotenv(find_dotenv())
     con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"), port=5431)
     cur = con.cursor()
-except: raise RuntimeError("Database credentials error")
+except RuntimeError("Database credentials error"):
+    logger.exception("Database credentials error")
+    raise
 
 
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 if not EMAIL_ADDRESS or not EMAIL_PASSWORD:
+    logger.error("Email credentials error")
     raise RuntimeError("Credentials error")
 
 
@@ -81,12 +92,14 @@ def send_gmail(data, receiver):
             smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
             smtp.send_message(msg)        
     except SMTPResponseException as e:
+        logger.exception(f"Error code:{e.smtp_code}, {e.smtp_error}")
         print("Error code:", e.smtp_code,"\n", e.smtp_error)
         return (e.smtp_code, e.smtp_error)
 
 
 # Inserts into DB mailing table information for further usage in send_gmail function
 def set_up_track(user_id, location_id):
+    logger.info(f"Function called with {user_id}, {location_id}")
     cur.execute("SELECT EXISTS(SELECT 1 FROM mailing WHERE user_id = %s LIMIT 1)", (user_id, ))
     con.commit()
     result = cur.fetchall()
@@ -102,6 +115,7 @@ def set_up_track(user_id, location_id):
 
 # Removes user info from mailing table
 def stop_tracking(user_id):
+    logger.info(f"Function called with {user_id}")
     try:
         cur.execute("DELETE FROM mailing WHERE user_id=%s", (user_id,))
         con.commit()
@@ -187,7 +201,9 @@ def query_mailing_table():
     try:
         con.commit()
         result = cur.fetchall()
-    except: return RuntimeError("An error occured during DB query")
+    except: 
+        logging.warning("An error occured during DB query")
+        return RuntimeError("An error occured during DB query")
     if result[0][0] != "":
         for i in result:
             i = re.sub(filter,'',i[0]).split(",")

@@ -1,4 +1,4 @@
-import os, re, requests
+import os, re, requests, logging
 from flask import Flask, redirect, request, session, render_template, flash, url_for
 from weather import get_weather
 from accounts import Accounts, input_validation, login_required, generate_temporary_password
@@ -8,6 +8,14 @@ from mailing import send_gmail, day_of_week, set_up_track, compose_weather_mail_
 from flask import Response
 from datetime import datetime, timedelta
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s:%(name)s:%(filename)s:%(funcName)s:%(levelname)s:%(message)s")
+handler = logging.FileHandler("logs.log")
+handler.setFormatter(formatter)
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
+
 # Map-tiles url
 url_root = "http://tile.openweathermap.org/map" 
 temp_storage = []
@@ -16,10 +24,12 @@ load_dotenv(find_dotenv())
 secret_key = os.getenv("FLASK_SECRET_KEY")
 
 if not secret_key:
+    logger.error("Flask secret key error")
     raise RuntimeError("Flask secret key error")
 
 app_key = os.getenv("OWM_MAP_KEY")
 if not app_key:
+    logger.error("OWM map key error")
     raise RuntimeError("OWM map key error")
 
 app = Flask(__name__)
@@ -34,8 +44,11 @@ def index():
         location = request.form.get("location").capitalize()
         print(location)
         DATA = get_weather(location)
+        print(DATA)
         STATUS = f"{location} not found"
-        if type(DATA) != RuntimeError:
+        if type(DATA) == RuntimeError:
+            return render_template('index.html', status=STATUS)
+        else:
             DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
             search_result = Quick_search.create_quick_search(location, location_list)
             if session.get("user_id") != None:
@@ -44,8 +57,7 @@ def index():
                 search_result = Quick_search.query_quick_search()
             else:
                 search_result = {"Unknown" : search_result}
-        return render_template('index.html', status=STATUS) if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week,
-         compass=compass, search_result=search_result) 
+        return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
     else:
         return render_template("index.html")
 
@@ -61,7 +73,10 @@ def register():
             return render_template("register.html")
         else:
             user = Accounts(request.form.get("email"), request.form.get("password"))
-            flash(user.register(request.form.get("username")), "info")
+            user_status = user.register(request.form.get("username"))
+            flash(user_status, "info")
+            user_info = request.form.get("email")
+            logging.info(f"User {user_info} registration status, {user_status}")
             return redirect(url_for("login"))
     else:
         form.clear()
@@ -84,6 +99,7 @@ def login():
                 session["username"] = user[1][0][1]
                 session["email"] = user[1][0][2]    
                 print(session["user_id"])
+                logging.info(f"User {user[1][0][2]} has loged in successfully!")
                 return redirect("/")
             else:
                 flash(["Wrong email or password"], "info")
@@ -96,6 +112,8 @@ def login():
 @app.route("/logout", methods=["GET"])
 def logout():
     Quick_search.clear_buffer()
+    user_id = session["user_id"]
+    logger.info(f"User {user_id} has loged out")
     session.pop("user_id", None)
     return redirect("/")
 
@@ -112,8 +130,10 @@ def delete():
             return render_template("delete.html")
         user = Accounts(session["email"], request.form.get("password"))
         if user.user_verification():
+            user_info = session["email"]
             user.delete()
             Quick_search.clear_buffer()
+            logging.info(f"User {user_info} has been deleted successfully!")
             session.pop("user_id", None)
             return redirect("/")
         return redirect("/delete")
@@ -132,6 +152,8 @@ def change_password():
         user = Accounts(session["email"], request.form.get("password"))
         if user.user_verification():
             user.change_password(request.form.get("password_new"))
+            user_info = session["user_id"]
+            logging.info(f"User {user_info} password has been changed!")
             return redirect("/")
         return redirect("/change_password")
     return render_template("change_password.html")
@@ -147,10 +169,11 @@ def restore_password():
         temp_password_hash = session.get("temporary_password_hash")
         if temp_password_hash:
             user = Accounts(session.get("recovery_email"), request.form.get("password_new"))
-            session.pop("recovery_email", None)
             session.pop("temporary_password_hash", None)
             if not user.restore_password(temp_password_hash, request.form.get("temp_passsword")):
                 return redirect("/restore_password.html")
+            user_info = session["recovery_email"]
+            logging.info(f"User {user_info} successfully recovered account!")
             return redirect("/login")
         return redirect("/send_temporary_password")
     return render_template("restore_password.html")
@@ -169,6 +192,8 @@ def send_temporary_password():
         message = compose_recovery_mail_msg(temp_password[1])
         send_gmail(message, request.form.get("email"))
         temp_password = None
+        user_info = request.form.get("email")
+        logging.info(f"Temporary password was sent to {user_info}")
         return redirect("/restore_password")
     return render_template("send_temporary_password.html")
 
@@ -189,11 +214,13 @@ def track():
         session["track"] = location_id
         session["track_name"] = location_name
         DATA = get_weather(location_name)
-        if type(DATA) != RuntimeError:
-            DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
         if set_up_track(session["user_id"], location_id) and type(DATA) != RuntimeError:
+            DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
             send_gmail(compose_weather_mail_msg(DATA), session["email"])
-        return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
+            user_info = session["user_id"]
+            logging.info(f"User {user_info} started tracking!")
+            return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
+        return redirect("/")
     return redirect("/")
 
 
@@ -207,10 +234,14 @@ def stop_track():
         if stop_tracking(session["user_id"]):
             location_name = request.form.get("location")
             DATA = get_weather(location_name)
-            if type(DATA) != RuntimeError:
+            if type(DATA) == RuntimeError:
+                return redirect("/")
+            else: 
                 DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
-            print(search_result)
-            return redirect("/") if type(DATA) == RuntimeError else render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
+                print(search_result)
+                user_info = session["user_id"]
+                logging.info(f"User {user_info} stopped tracking!")
+                render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
     return redirect("/")
 
 
@@ -223,6 +254,7 @@ def get_tile(tile_name,z,x,y):
     y = int(float(y.split("=")[1]))
     req = requests.get(f"{url_root}/{tile_name}/{z}/{x}/{y}.png?appid={app_key}")
     if req.status_code != 200:
+        logger.warning(f"Map request error {req.status_code}")
         print("Map request error")
     return Response(req.content, content_type = req.headers['content-type'])
 
@@ -267,7 +299,7 @@ class Quick_search():
         return {"Unknown": location_list}
 
 
-# Checks if track request is already exists
+# Checks if track request already exists
 def check_session(location):
     filter = """['" ()]"""
     try:
@@ -278,6 +310,7 @@ def check_session(location):
 
 
 def convert_timestamp(data, utc_difference):
+    logger.info(f"Function called with {data[0][0][1]['sunrise']}, {data[0][0][1]['sunset']}, {utc_difference}")
     sunrise = datetime.fromtimestamp(int(data[0][0][1]['sunrise']))
     sunset = datetime.fromtimestamp(int(data[0][0][1]['sunset']))
     difference_in_hours = timedelta(hours = int(utc_difference))

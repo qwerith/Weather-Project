@@ -1,13 +1,23 @@
-import os, re, psycopg2
+import os, re, psycopg2, logging
 from dotenv import load_dotenv, find_dotenv
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s:%(name)s:%(filename)s:%(funcName)s:%(levelname)s:%(message)s")
+handler = logging.FileHandler("logs.log")
+handler.setFormatter(formatter)
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
 
 #loading environment variables
 try:
     load_dotenv(find_dotenv())
     con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"), port = 5431)
     cur = con.cursor()
-except: raise RuntimeError("Database credentials error")
+except psycopg2.OperationalError as e:
+    logger.exception("Database credentials error")
+    raise RuntimeError("Database credentials error") from e
 
 #checks whether input is location name or location coordinates
 #uses "pattern" to define whether input coincides with coordinates, example: """chars(49.3580)chars(23.5123)chars"""
@@ -21,12 +31,16 @@ def upd_check(file_time):
     fmt = '%Y-%m-%d %H:%M:%S'
     current_date = datetime.utcnow().strftime(fmt)
     current_date = datetime.strptime(current_date, fmt)
-    difference = current_date - file_time if current_date > file_time else file_time - current_date
-    dif_in_hours = int((difference.total_seconds()/ 60) / 60)
-    print(current_date)
-    print(file_time)
-    print(dif_in_hours)
-    return None if dif_in_hours >= 12 else True
+    try:
+        difference = current_date - file_time if current_date > file_time else file_time - current_date
+        dif_in_hours = int((difference.total_seconds()/ 60) / 60)
+        print(current_date)
+        print(file_time)
+        print(dif_in_hours)
+    except Exception:
+        logger.exception(Exception)
+        raise
+    else: return None if dif_in_hours >= 12 else True
 
 #queries "location" table for "request_date" and "location_id"
 #returns output dapanding on data status(True/None,""/"outdated"/"not_exists", id(if data exists and UPD))
@@ -44,7 +58,9 @@ def cache_check(location):
         cur.execute(query,parameters)
         timestamp_id = cur.fetchall()
         con.commit()
-    except: raise RuntimeError("Query failed")
+    except RuntimeError:
+        logging.exception(f"Query failed: {query}{parameters}")
+        raise
     try:
         if upd_check(timestamp_id[0][0]):
             return (True,"",timestamp_id[0][1])
