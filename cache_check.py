@@ -59,7 +59,7 @@ def cache_check(location):
         timestamp_id = cur.fetchall()
         con.commit()
     except RuntimeError:
-        logging.exception(f"Query failed: {query}{parameters}")
+        logger.exception(f"Query failed: {query}{parameters}")
         raise
     try:
         if upd_check(timestamp_id[0][0]):

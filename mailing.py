@@ -202,7 +202,7 @@ def query_mailing_table():
         con.commit()
         result = cur.fetchall()
     except: 
-        logging.warning("An error occured during DB query")
+        logger.warning("An error occured during DB query")
         return RuntimeError("An error occured during DB query")
     if result[0][0] != "":
         for i in result:

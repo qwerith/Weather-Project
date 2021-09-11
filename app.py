@@ -44,7 +44,6 @@ def index():
         location = request.form.get("location").capitalize()
         print(location)
         DATA = get_weather(location)
-        print(DATA)
         STATUS = f"{location} not found"
         if type(DATA) == RuntimeError:
             return render_template('index.html', status=STATUS)
@@ -76,7 +75,7 @@ def register():
             user_status = user.register(request.form.get("username"))
             flash(user_status, "info")
             user_info = request.form.get("email")
-            logging.info(f"User {user_info} registration status, {user_status}")
+            logger.info(f"User {user_info} registration status, {user_status}")
             return redirect(url_for("login"))
     else:
         form.clear()
@@ -95,11 +94,11 @@ def login():
             user = Accounts(request.form.get("email"), request.form.get("password"))
             user = user.user_verification()
             if user:
+                logger.info(f"User {user[1][0][0]} has loged in successfully!")
                 session["user_id"] = user[1][0][0]
                 session["username"] = user[1][0][1]
                 session["email"] = user[1][0][2]    
                 print(session["user_id"])
-                logging.info(f"User {user[1][0][2]} has loged in successfully!")
                 return redirect("/")
             else:
                 flash(["Wrong email or password"], "info")
@@ -133,7 +132,7 @@ def delete():
             user_info = session["email"]
             user.delete()
             Quick_search.clear_buffer()
-            logging.info(f"User {user_info} has been deleted successfully!")
+            logger.info(f"User {user_info} has been deleted successfully!")
             session.pop("user_id", None)
             return redirect("/")
         return redirect("/delete")
@@ -153,7 +152,7 @@ def change_password():
         if user.user_verification():
             user.change_password(request.form.get("password_new"))
             user_info = session["user_id"]
-            logging.info(f"User {user_info} password has been changed!")
+            logger.info(f"User {user_info} password has been changed!")
             return redirect("/")
         return redirect("/change_password")
     return render_template("change_password.html")
@@ -173,7 +172,7 @@ def restore_password():
             if not user.restore_password(temp_password_hash, request.form.get("temp_passsword")):
                 return redirect("/restore_password.html")
             user_info = session["recovery_email"]
-            logging.info(f"User {user_info} successfully recovered account!")
+            logger.info(f"User {user_info} successfully recovered account!")
             return redirect("/login")
         return redirect("/send_temporary_password")
     return render_template("restore_password.html")
@@ -193,7 +192,7 @@ def send_temporary_password():
         send_gmail(message, request.form.get("email"))
         temp_password = None
         user_info = request.form.get("email")
-        logging.info(f"Temporary password was sent to {user_info}")
+        logger.info(f"Temporary password was sent to {user_info}")
         return redirect("/restore_password")
     return render_template("send_temporary_password.html")
 
@@ -218,7 +217,7 @@ def track():
             DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
             send_gmail(compose_weather_mail_msg(DATA), session["email"])
             user_info = session["user_id"]
-            logging.info(f"User {user_info} started tracking!")
+            logger.info(f"User {user_info} started tracking!")
             return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
         return redirect("/")
     return redirect("/")
@@ -240,18 +239,18 @@ def stop_track():
                 DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
                 print(search_result)
                 user_info = session["user_id"]
-                logging.info(f"User {user_info} stopped tracking!")
+                logger.info(f"User {user_info} stopped tracking!")
                 render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
     return redirect("/")
 
 
 @app.route("/map/<tile_name>/<z>/<x>/<y>")
 def get_tile(tile_name,z,x,y):
-    print(tile_name,z,x,y)
     tile_name = tile_name.split("=")[1]
     z = int(float(z.split("=")[1]))
     x = int(float(x.split("=")[1]))
     y = int(float(y.split("=")[1]))
+    print(tile_name,z,x,y)
     req = requests.get(f"{url_root}/{tile_name}/{z}/{x}/{y}.png?appid={app_key}")
     if req.status_code != 200:
         logger.warning(f"Map request error {req.status_code}")

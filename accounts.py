@@ -56,7 +56,7 @@ class Accounts():
         if user and bcrypt.check_password_hash(user[0][3], self.password): 
             return(True, user)
         else:
-            return(None)
+            return None
     
     def delete(self):
         cur.execute("DELETE FROM users WHERE email=%s", (self.email, ))
