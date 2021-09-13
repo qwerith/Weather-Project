@@ -246,15 +246,15 @@ def stop_track():
 
 @app.route("/map/<tile_name>/<z>/<x>/<y>")
 def get_tile(tile_name,z,x,y):
+    print(tile_name,z,x,y)
     tile_name = tile_name.split("=")[1]
     z = int(float(z.split("=")[1]))
     x = int(float(x.split("=")[1]))
     y = int(float(y.split("=")[1]))
-    print(tile_name,z,x,y)
     req = requests.get(f"{url_root}/{tile_name}/{z}/{x}/{y}.png?appid={app_key}")
     if req.status_code != 200:
         logger.warning(f"Map request error {req.status_code}")
-        print("Map request error")
+        print(f"Map request error {req.status_code}")
     return Response(req.content, content_type = req.headers['content-type'])
 
 
