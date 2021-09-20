@@ -50,7 +50,7 @@ def create_html_table_rows(data):
                                 <td style="padding: 0 10px;">{data[0][count][0].split(" ")[1][:5]}</td>
                                 <td style="padding: 0 5%;min-width:160px;"> {data[0][count][1]["min_temp"]} / {data[0][count][1]["max_temp"]}°</td>
                                 <td style="padding: 0 5%;">{data[0][count][1]["humidity"]}%</td>
-                                <td style="padding: 0 5%;">{data[0][count][1]["pop"]}%</td>
+                                <td style="padding: 0 5%;">{int(round(float(data[0][count][1]["pop"])* 100))}%</td>
                                 <td style="padding: 0 10px;">{data[0][count][1]["conditions"]}</td>
                                 <td style="padding: 0 10px;"><img src="http://openweathermap.org/img/wn/{data[0][count][1]["picture_name"]}@2x.png"alt=""style="width:50px;height:50px;"></td>
                                 <td style="padding: 0 10px;">{data[0][count][1]["wind_speed"]} m/s</td>
@@ -66,7 +66,14 @@ def create_html_table_rows(data):
 
 # Converts date to day of week, day number and month
 def day_of_week(date):
-    date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+    if type(date) != str:
+        logger.warning(TypeError)
+        return date
+    try:
+        date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+    except ValueError:
+        logger.warning(ValueError)
+        return date
     day_number = str(date).split(" ")[0].split("-")[2]
     if day_number[0] == '0':
         day_number = day_number[1]
@@ -125,6 +132,14 @@ def stop_tracking(user_id):
 
 # Creates html message for sending by "send_gmail" function
 def compose_weather_mail_msg(data):
+    if type(data) != list:
+        logger.error(TypeError)
+        raise TypeError
+    try:
+        length = len(data[0])
+    except IndexError:
+        logger.error(IndexError)
+        raise
     date = day_of_week(data[0][0][0])
     date_info = str(date[0]) +" "+ str(date[1])
     snippet = create_html_table_rows(data)
@@ -134,7 +149,7 @@ def compose_weather_mail_msg(data):
         <head>
             <meta charset="UTF-8">
         </head>
-        <body style="width:auto;min-width:600px;">
+        <body style="width:75%;min-width:100%;hight:75%;min-hight:50%">
             <h1>Weather on {date_info}</h1>
             <div>
                 <table style="padding:1.5%;color:white;background-color:#212529;border-radius:50px;">
@@ -161,13 +176,16 @@ def compose_weather_mail_msg(data):
             </div>
             <br>
             <div>
-                <h4> {data[0][0][1]['Location']} Id: {data[0][0][1]['ID']} Lat: {data[0][0][1]['Lat']} Lon: {data[0][0][1]['Lon']}</h4>
+                <h4> {data[0][0][1]['Location']} Id: {data[0][0][1]['ID']} Lat: {data[0][0][1]['Lat']} Lon: {data[0][0][1]['Lon']} </h4>
+                <h4> Sunrise: {data[0][0][1]['sunrise']} Sunset: {data[0][0][1]['sunset']} </h4>
             </div>
         </body>
         </html>
         """
     data = [plane_txt, html_txt]
     return data
+
+
 
 # Compose message for password recovery
 def compose_recovery_mail_msg(password):
@@ -204,7 +222,7 @@ def query_mailing_table():
     except: 
         logger.warning("An error occured during DB query")
         return RuntimeError("An error occured during DB query")
-    if result[0][0] != "":
+    if result != []:
         for i in result:
             i = re.sub(filter,'',i[0]).split(",")
             mailing_list.append(i)

@@ -46,8 +46,10 @@
 <tbody>
   {% for i in data[count] %}
       <tr id="table_row">
+        {% set min_temp = i[1]["min_temp"] %}
+        {% set max_temp = i[1]["max_temp"] %}
           <td>{{ i[0].split()[1] }}</td>
-          <td>{{ i[1]["min_temp"] }}° / {{ i[1]["max_temp"] }}°</td>
+          <td>{{ min_temp|int }}° / {{ max_temp|int }}°</td>
           <td>{{ i[1]["humidity"] }}%</td>
           {% set pop = (i[1]['pop']) * 100 %}
           <td>{{ pop|int }}%</td>

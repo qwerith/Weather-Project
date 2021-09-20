@@ -168,11 +168,11 @@ def restore_password():
         temp_password_hash = session.get("temporary_password_hash")
         if temp_password_hash:
             user = Accounts(session.get("recovery_email"), request.form.get("password_new"))
-            session.pop("temporary_password_hash", None)
             if not user.restore_password(temp_password_hash, request.form.get("temp_passsword")):
                 return redirect("/restore_password.html")
             user_info = session["recovery_email"]
             logger.info(f"User {user_info} successfully recovered account!")
+            session.pop("temporary_password_hash", None)
             return redirect("/login")
         return redirect("/send_temporary_password")
     return render_template("restore_password.html")
@@ -188,8 +188,14 @@ def send_temporary_password():
         session["recovery_email"] = request.form.get("email") 
         temp_password = generate_temporary_password(request.form.get("email"))
         session["temporary_password_hash"] = temp_password[0]
-        message = compose_recovery_mail_msg(temp_password[1])
+        if type(temp_password[0]) == str and len(temp_password) > 0:
+            message = compose_recovery_mail_msg(temp_password[1])
+        else:
+            logger.warning(TypeError("Excpected password value of type string"))
+            flash("Account does not exist", "info")
+            return render_template("send_temporary_password.html")
         send_gmail(message, request.form.get("email"))
+        message = None
         temp_password = None
         user_info = request.form.get("email")
         logger.info(f"Temporary password was sent to {user_info}")
@@ -240,7 +246,7 @@ def stop_track():
                 print(search_result)
                 user_info = session["user_id"]
                 logger.info(f"User {user_info} stopped tracking!")
-                render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
+                return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
     return redirect("/")
 
 
@@ -277,7 +283,7 @@ class Quick_search():
         return False
 
     def create_quick_search(location, location_list):
-        if location_list[0]["search_0"] != location and location_list[1]["search_1"] != location and location_list[2]["search_2"] != location:
+        if location not in [location_list[0]["search_0"], location_list[1]["search_1"], location_list[2]["search_2"]]:
             if location_list[0]["search_0"] == None:
                 location_list[0].update({"search_0" : location})
             elif location_list[0]["search_0"] != None and location_list[1]["search_1"] == None:
@@ -320,10 +326,14 @@ def convert_timestamp(data, utc_difference):
     if int(utc_difference) > 0:
         data[0][0][1]['timezone'] = "+" + data[0][0][1]['timezone']
     return data
-
-
+    
 
 def compass(direction):
+    try:
+        int(direction)
+    except:
+        logger.warning("ValueError occured!")
+        return str(135)
     direction = int(direction)
     if direction > 135:
         direction = (direction - 135)

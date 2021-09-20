@@ -32,11 +32,12 @@ class Accounts():
         try:
             con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"), port=5431)
             cur = con.cursor()
-        except: raise RuntimeError("Database credentials error")
+        except:
+            logger.error(RuntimeError("Database credentials error"))
+            raise RuntimeError("Database credentials error")
         cur.execute("SELECT EXISTS(SELECT 1 FROM users WHERE email = %s LIMIT 1)", (self.email, ))
         con.commit()
         result = cur.fetchall()
-        print(result)
         if result[0][0] != False:
             return ["Account already exists"]  
         else:
@@ -78,17 +79,25 @@ def generate_temporary_password(email):
     cur.execute("SELECT EXISTS(SELECT 1 FROM users WHERE email = %s LIMIT 1)", (email, ))
     con.commit()
     result = cur.fetchall()
-    if result[0][0] != None:
+    if result[0][0] != False:
         chars = string.ascii_uppercase + string.ascii_lowercase + string.digits
         size = random.randint(5, 10)
         temp_password = ''.join(random.choice(chars) for x in range(size))
         password_hash = bcrypt.generate_password_hash(temp_password).decode("utf-8")
         return password_hash, temp_password
-    return None
+    return None, ""
 
 
 def input_validation(user_input):
     #regex form for email validation
+    try:
+        len(user_input) > 1
+        for i in user_input:
+            if type(i) != str:
+                return ["Invalid data type"]
+    except IndexError:
+        logger.error(IndexError)
+        raise
     response = []
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     if not (re.match(email_pattern, user_input[0])):

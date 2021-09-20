@@ -1,7 +1,7 @@
 import requests, os, json, re, psycopg2, logging
 from dotenv import load_dotenv, find_dotenv
 from datetime import datetime
-from cache_check import cache_check, input_type_check
+from cache_check import cache_check, input_type_check, check_by_id
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -55,7 +55,10 @@ def convert_location_to_query(location):
 
 def get_input(location):
     #location = input("Enter location name: ")
-    if len(location) > 30 or len(location) <= 2:
+    if type(location) != str:
+        logger.warning(location)
+        return "q=Lviv"
+    if len(location) > 72 or len(location) <= 2:
         location = "q=Lviv"
     else:
         location = convert_location_to_query(location)
@@ -92,11 +95,12 @@ def get_weather(location_input):
         if request.status_code != 200:
             logger.warning(request.status_code)
             return RuntimeError("Request failed", request.status_code)
-        else:
-            if check[1] == "not_exists":
-                Cache.write_location(request.json(), location_input)
+        if check[1] == "not_exists" and check_by_id(request.json()["city"]["id"]) == None:
+            Cache.write_location(request.json(), location_input)
             Cache.write_weather(request.json(), check[1])
-            return Cache.read(request.json()["city"]["id"])
+        else:
+            Cache.write_weather(request.json(), "outdated")
+        return Cache.read(request.json()["city"]["id"])
     else:
         return Cache.read(check[2])
 
@@ -119,7 +123,7 @@ class Cache():
             cur.execute("INSERT INTO location (id, location_name, lat, lon, request_date, country, sunrise, sunset, timezone) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
             (db_location[0], db_location[1], db_location[2], db_location[3], db_location[4], db_location[5], db_location[6], db_location[7], db_location[8]))
             con.commit()
-        except Exception("Cache Operation Error"):
+        except Exception:
             logger.exception("Cache Operation Error")
             raise
 
@@ -161,7 +165,7 @@ class Cache():
             count += 1  
         con.commit()
 
-    #organises, prints and returns list
+    #organises and returns list
     def parse_database_response(query_result):
         keys = Parse_var.DB_RES_KEYS.value
         weather_dict = {}
@@ -197,12 +201,16 @@ class Cache():
 
     #queries "location" and "weather" tables for data
     def read(id):
-        cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions, picture_name, wind, wind_speed, location_id, location_name, lat, lon, country, sunrise, sunset, timezone, pop 
-        FROM weather INNER JOIN location ON weather.location_id=location.id WHERE location_id=%s ORDER BY date ASC""", (id, ))
-        query_result = cur.fetchall()
-        con.commit()
+        try:
+            cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions, picture_name, wind, wind_speed, location_id, location_name, lat, lon, country, sunrise, sunset, timezone, pop 
+            FROM weather INNER JOIN location ON weather.location_id=location.id WHERE location_id=%s ORDER BY date ASC""", (id, ))
+            query_result = cur.fetchall()
+            con.commit()
+        except:
+            logger.warning("Query failed!")
+            return RuntimeError("Query failed!")
         return Cache.parse_database_response(query_result)
         
 
-#result = get_weather("Lutsk")
+#result = get_weather("London")
 #print(result)

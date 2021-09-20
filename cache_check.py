@@ -31,29 +31,22 @@ def upd_check(file_time):
     fmt = '%Y-%m-%d %H:%M:%S'
     current_date = datetime.utcnow().strftime(fmt)
     current_date = datetime.strptime(current_date, fmt)
-    try:
-        difference = current_date - file_time if current_date > file_time else file_time - current_date
-        dif_in_hours = int((difference.total_seconds()/ 60) / 60)
-        print(current_date)
-        print(file_time)
-        print(dif_in_hours)
-    except Exception:
-        logger.exception(Exception)
-        raise
-    else: return None if dif_in_hours >= 12 else True
+    difference = current_date - file_time if current_date > file_time else file_time - current_date
+    dif_in_hours = int((difference.total_seconds()/ 60) / 60)
+    print(current_date)
+    print(file_time)
+    print(dif_in_hours)
+    return None if dif_in_hours >= 12 else True
 
 #queries "location" table for "request_date" and "location_id"
 #returns output dapanding on data status(True/None,""/"outdated"/"not_exists", id(if data exists and UPD))
 def cache_check(location):
     if input_type_check(location) == "name":
-        location = location[2: ]
+        parameters = (location[2: ],)
         query = "SELECT request_date, id FROM location WHERE location_name = %s"
-        parameters = (location,)
     else:
         query = "SELECT request_date, id FROM location WHERE lat = %s AND lon = %s"
-        lat = location.split("&")[0].split("=")[1]
-        lon = location.split("&")[1].split("=")[1]
-        parameters = (lat,lon)
+        parameters = (location.split("&")[0].split("=")[1], location.split("&")[1].split("=")[1])
     try:
         cur.execute(query,parameters)
         timestamp_id = cur.fetchall()
@@ -65,6 +58,18 @@ def cache_check(location):
         if upd_check(timestamp_id[0][0]):
             return (True,"",timestamp_id[0][1])
         return (None, "outdated")
-    except: return (None, "not_exists")
+    except:
+        logger.warning(Exception)
+        return (None, "not_exists")
+
+def check_by_id(id):
+    query = "SELECT EXISTS(SELECT 1 FROM location WHERE id = %s LIMIT 1)"
+    cur.execute(query,(id, ))
+    con.commit()
+    exists = cur.fetchall()
+    if exists[0][0] == False:
+        return None
+    return True
+
 
     
