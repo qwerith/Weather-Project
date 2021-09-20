@@ -196,7 +196,11 @@ class Cache():
                 final_data_list.append(group_list)
                 group_list = []
                 group_list.append(i)
-                group_by_date = str(i[0])
+                group_by_date = i[0]
+        try:
+            final_data_list.append(group_list)
+        except:
+            logger.warning(f"Function ended with {group_list}")
         return final_data_list
 
     #queries "location" and "weather" tables for data
@@ -212,5 +216,5 @@ class Cache():
         return Cache.parse_database_response(query_result)
         
 
-#result = get_weather("London")
-#print(result)
+result = get_weather("London")
+print(result)
