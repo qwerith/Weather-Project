@@ -90,8 +90,13 @@
     width: 100%;
 }
 
-#table-dark > tr > th{
+#table-dark > tr > th {
     border-bottom-width: 0;
+}
+
+#Conditions {
+    min-width: 182px;
+    padding: auto;
 }
 
 #table_row > td {
@@ -178,6 +183,7 @@
     border-color: var(--froth-color);
     color: var(--secondary-color);
     min-width: 130px;
+    min-height: 66px;
 }
 
 #nav-profile-tab {
@@ -477,26 +483,26 @@ form {
 
 #container_map {
     position: relative;
-    padding: 0 12px 45px 12px;
+    padding: 66px 12px 45px 12px;
     display: flex;
     justify-content: right;
     align-items: right;
     width: 100%;
+    height: 100%;
     min-width: 467px;
 }
 
 .container-fluid > #map {
+    position: relative;
     padding: 50px 12px 50px 12px;
     display: flex;
     justify-content: right;
     align-items: right;
     width: 100%;
-    margin-top: 66px;
-}
-
-#map {
-    height: 547px;
-    width: 100%;
+    height: 100%;
+    margin-top: 0;
+    min-height: 547px;
+    max-height: 1000px;
 }
 
 

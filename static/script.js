@@ -65,35 +65,44 @@ function manageMap(lat, lon) {
 
 window.onload = function positionNew() {
     var width = $(window).width();
-    if (width < 1200) {
+    if (width < 1401) {
         document.getElementById("view-main").style.flexFlow = "column nowrap";
-        document.getElementById("map").style.marginTop = "0";
-        document.getElementById("nav-tab").style.flexFlow = "column wrap";
+        document.getElementById("map").style.marginTop = "-50px";
+        document.getElementById("nav-tab").style.flexFlow = "wrap";
         document.getElementById("location_sun_time").style.position = "relative"
         document.getElementById("location_sun_time").style.marginBottom = "50px"
+        document.getElementById("view-main-left").style.width = "100%";
+        document.getElementById("view-main-right").style.width = "100%";
     } else {
         document.getElementById("view-main").style.flexFlow = "row nowrap";
-        document.getElementById("map").style.marginTop = "66px";
+        document.getElementById("map").style.marginTop = "0";
         document.getElementById("nav-tab").style.flexFlow = "initial";
         document.getElementById("location_sun_time").style.position = "absolute"
         document.getElementById("location_sun_time").style.marginBottom = "0"
+        document.getElementById("view-main-left").style.width = "50%";
+        document.getElementById("view-main-right").style.width = "50%";
     }
 }
 
 window.onresize = function positionNew() {
     var width = $(window).width();
-    if (width < 1200) {
+    if (width < 1401) {
         document.getElementById("view-main").style.flexFlow = "column nowrap";
-        document.getElementById("map").style.marginTop = "0";
-        document.getElementById("nav-tab").style.flexFlow = "column wrap";
+        document.getElementById("map").style.marginTop = "-50px";
+        document.getElementById("nav-tab").style.flexFlow = "wrap";
         document.getElementById("location_sun_time").style.position = "relative"
         document.getElementById("location_sun_time").style.marginBottom = "50px"
+        document.getElementById("view-main-left").style.width = "100%";
+        document.getElementById("view-main-left").style.width = "100%";
+        document.getElementById("view-main-right").style.width = "100%";
     } else {
         document.getElementById("view-main").style.flexFlow = "row nowrap";
-        document.getElementById("map").style.marginTop = "66px";
+        document.getElementById("map").style.marginTop = "0";
         document.getElementById("nav-tab").style.flexFlow = "initial";
         document.getElementById("location_sun_time").style.position = "absolute"
         document.getElementById("location_sun_time").style.marginBottom = "0"
+        document.getElementById("view-main-left").style.width = "50%";
+        document.getElementById("view-main-right").style.width = "50%";
     }
 }
 

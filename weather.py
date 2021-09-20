@@ -216,5 +216,5 @@ class Cache():
         return Cache.parse_database_response(query_result)
         
 
-result = get_weather("London")
-print(result)
+#result = get_weather("London")
+#print(result)
