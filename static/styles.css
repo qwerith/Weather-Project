@@ -75,7 +75,7 @@
 }
 
 .d-flex > input {
-    min-width: 100px;
+    min-width: 150px;
     width: 100%;
 }
 
@@ -335,8 +335,10 @@
 .location_sun_time {
     display: inline-block;
     text-align: center;
+    max-height: 30px;
     position: absolute;
     width: auto;
+    margin-top: -20px;
 }
 
 #location_sunrise {

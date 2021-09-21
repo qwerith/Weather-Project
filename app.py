@@ -55,8 +55,8 @@ def index():
                 Quick_search.write_quick_search_buffer(search_result)
                 search_result = Quick_search.query_quick_search()
             else:
-                search_result = {"Unknown" : search_result}
-        return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
+                search_result = None
+        return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result)
     else:
         return render_template("index.html")
 
@@ -147,7 +147,7 @@ def change_password():
         request.form.get("password_new"), request.form.get("password_new_confirm")])
         if input_valid != []:
             flash(input_valid, "info")
-            return render_template("change_password.html")
+            return redirect("/change_password")
         user = Accounts(session["email"], request.form.get("password"))
         if user.user_verification():
             user.change_password(request.form.get("password_new"))
@@ -169,7 +169,7 @@ def restore_password():
         if temp_password_hash:
             user = Accounts(session.get("recovery_email"), request.form.get("password_new"))
             if not user.restore_password(temp_password_hash, request.form.get("temp_passsword")):
-                return redirect("/restore_password.html")
+                return redirect("/restore_password")
             user_info = session["recovery_email"]
             logger.info(f"User {user_info} successfully recovered account!")
             session.pop("temporary_password_hash", None)
@@ -210,7 +210,6 @@ def track():
     filter = """['" ()]"""
     if request.method == "POST" and check_session(request.form.get("location")) == None:
         search_result = Quick_search.query_quick_search()
-        print()
         session.pop("track", None)
         session.pop("track_name", None)
         location_name = re.sub(filter,"",request.form.get("location")).split(",")[0]

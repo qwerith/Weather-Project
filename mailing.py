@@ -47,13 +47,13 @@ def create_html_table_rows(data):
         count += 1
         if count < length:
             table_row = f"""<tr>
-                                <td style="padding: 0 10px;">{data[0][count][0].split(" ")[1][:5]}</td>
-                                <td style="padding: 0 5%;min-width:160px;"> {data[0][count][1]["min_temp"]} / {data[0][count][1]["max_temp"]}°</td>
-                                <td style="padding: 0 5%;">{data[0][count][1]["humidity"]}%</td>
-                                <td style="padding: 0 5%;">{int(round(float(data[0][count][1]["pop"])* 100))}%</td>
-                                <td style="padding: 0 10px;">{data[0][count][1]["conditions"]}</td>
-                                <td style="padding: 0 10px;"><img src="http://openweathermap.org/img/wn/{data[0][count][1]["picture_name"]}@2x.png"alt=""style="width:50px;height:50px;"></td>
-                                <td style="padding: 0 10px;">{data[0][count][1]["wind_speed"]} m/s</td>
+                                <td style="padding: 0 10px;align-items:center;text-align:center;">{data[0][count][0].split(" ")[1][:5]}</td>
+                                <td style="padding: 0 5%;min-width:160px;align-items:center;text-align:center;"> {data[0][count][1]["min_temp"]} / {data[0][count][1]["max_temp"]}°</td>
+                                <td style="padding: 0 2%;align-items:center;text-align:center;">{data[0][count][1]["humidity"]}%</td>
+                                <td style="padding: 0 5%;align-items:center;text-align:center;">{int(round(float(data[0][count][1]["pop"])* 100))}%</td>
+                                <td style="padding: 0 10px;align-items:center;text-align:center;">{data[0][count][1]["conditions"]}</td>
+                                <td style="padding: 0 10px;align-items:center;text-align:center;"><img src="http://openweathermap.org/img/wn/{data[0][count][1]["picture_name"]}@2x.png"alt=""style="width:50px;height:50px;"></td>
+                                <td style="padding: 0 10px;align-items:center;text-align:center;">{data[0][count][1]["wind_speed"]} m/s</td>
                             </tr>
                         """
             html_snippets.append(table_row)
@@ -78,6 +78,7 @@ def day_of_week(date):
     if day_number[0] == '0':
         day_number = day_number[1]
     day = (str(date.strftime('%A')), day_number, date.strftime("%B"))
+    print(day)
     return day
 
 
@@ -150,7 +151,7 @@ def compose_weather_mail_msg(data):
             <meta charset="UTF-8">
         </head>
         <body style="width:75%;min-width:100%;hight:75%;min-hight:50%">
-            <h1>Weather on {date_info}</h1>
+            <h2>Weather on {date_info}</h2>
             <div>
                 <table style="padding:1.5%;color:white;background-color:#212529;border-radius:50px;">
                         <thead style="font-size:130%;">
@@ -195,13 +196,13 @@ def compose_recovery_mail_msg(password):
         <head>
             <meta charset="UTF-8">
         </head>
-        <body style="width:30%;">
+        <body style="width:50%;">
             <h1>Your recovery password</h1>
             <div style="padding:1.5%;color:white;background-color:#212529;text-align:center;">
                 <h1 style="padding:50px 50px;">{password}</h1>
             </div>
             <div>
-            <h3>If you did not make this request just ignore this message</h3>
+            <h3>If you did not make this request just ignore this message :)</h3>
             </div>
         </body>
         </html>

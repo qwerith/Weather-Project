@@ -100,15 +100,16 @@ def input_validation(user_input):
         raise
     response = []
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    punctuation = """[!#$%&'()*+, -./:;"<=>?@[\]^_`{|}~:]"""
     if not (re.match(email_pattern, user_input[0])):
         response.append("Invalid email")
-    if not len(user_input[1]) >= 5 and len(user_input[1]) <= 10:
+    if not len(user_input[1]) >= 5 and len(user_input[1]) <= 10 or re.findall(punctuation, user_input[1]) != []:
         response.append("Password must be 5 to 10 characters long")  
     if len(user_input) == 3:
-        if not user_input[1] == user_input[2]:
+        if not user_input[1] == user_input[2] or re.findall(punctuation, user_input[2]) != []:
             response.append("Passwords do not match")
     if len(user_input) == 4:
-        if not user_input[2] == user_input[3]:
+        if not user_input[2] == user_input[3] or re.findall(punctuation, user_input[3]) != []:
             response.append("Passwords do not match")
     return response
 
