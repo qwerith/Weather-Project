@@ -21,10 +21,12 @@ App is based on Flask framework, Postgresql DB.  Mailing is preformed using smtp
 <details><summary style="cursor:pointer;">hint</summary>
 
 To start tracking:
-![start track](examples/99.PNG)
+
+  ![start track](examples/99.PNG)
 
 To stop tracking:
-![start track](examples/10.png)
+
+  ![start track](examples/10.png)
 
 </details>
 
