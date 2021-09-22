@@ -36,7 +36,7 @@ def upd_check(file_time):
     print(current_date)
     print(file_time)
     print(dif_in_hours)
-    return None if dif_in_hours >= 12 else True
+    return None if dif_in_hours >= 6 else True
 
 #queries "location" table for "request_date" and "location_id"
 #returns output dapanding on data status(True/None,""/"outdated"/"not_exists", id(if data exists and UPD))
