@@ -39,7 +39,8 @@ To stop tracking:
 
 First you would need to set up DB, use Docker for that.
 After cloning repo via git ```git clone https://github.com/qwerith/Weather-Project``` use following comands:
-![docker-compose](examples/1.PNG)
+
+  ![docker-compose](examples/1.PNG)
 
 After container has been composed, open pg admin in the browser, log in
 
@@ -48,34 +49,43 @@ After container has been composed, open pg admin in the browser, log in
 (default credentials are ```yuriisorokin98@gmail.com``` and ```weatherapp```)
 
 Create server
-![create server](examples/3.PNG)
-![create server](examples/4.PNG)
+
+  ![create server](examples/3.PNG)
+
+  ![create server](examples/4.PNG)
 
 On Linux and macOS host name ```localhost``` should work fine, on Windows following steps should be done:  
 ```docker ps``` than ```docker inspect``` + postgres container id
 
-![create server](examples/44.PNG)
+
+  ![create server](examples/44.PNG)
 
 
 
 Host name should == to ```"IPAddress"``` value.
-![create server](examples/55.PNG)
+
+  ![create server](examples/55.PNG)
 
 
 Username should be changed to ```postgres```
 Default password == ```weatherapp```
 
 Open query tool and paste contents of ```SQL.txt``` file from ```Weather_project``` folder, run to create DB tables.
-![create server](examples/66.PNG)
+
+  ![create server](examples/66.PNG)
 
 #### Step 2
 Install dependencies
-![create server](examples/77.PNG)
+
+  ![create server](examples/77.PNG)
+  
 Note that path to requirements.txt will be different!
 
 #### Step 3
 Create ```.env``` file in your ```Weather_project``` folder and set up next credentials:
-![create server](examples/88.PNG)
+
+  ![create server](examples/88.PNG)
+  
 Note that FLASK_SECRED_KEY can be omitted!
 
 #### Step 4
