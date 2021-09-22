@@ -21,10 +21,10 @@ App is based on Flask framework, Postgresql DB.  Mailing is preformed using smtp
 <details><summary style="cursor:pointer;">hint</summary>
 
 To start tracking:
-![start track](static\images\99.png)
+![start track](examples\99.png)
 
 To stop tracking:
-![start track](static\images\10.png)
+![start track](examples\10.png)
 
 </details>
 
@@ -37,43 +37,43 @@ To stop tracking:
 
 First you would need to set up DB, use Docker for that.
 After cloning repo via git ```git clone https://github.com/qwerith/Weather-Project``` use following comands:
-![docker-compose](static\images\1.png)
+![docker-compose](examples\1.png)
 
 After container has been composed, open pg admin in the browser, log in
 
-![log in](static\images\2.png)
+![log in](examples\2.png)
 
 (default credentials are ```yuriisorokin98@gmail.com``` and ```weatherapp```)
 
 Create server
-![create server](static\images\3.png)
-![create server](static\images\4.png)
+![create server](examples\3.png)
+![create server](examples\4.png)
 
 On Linux and macOS host name ```localhost``` should work fine, on Windows following steps should be done:  
 ```docker ps``` than ```docker inspect``` + postgres container id
 
-![create server](static\images\44.png)
+![create server](examples\44.png)
 
 
 
 Host name should == to ```"IPAddress"``` value.
-![create server](static\images\55.png)
+![create server](examples\55.png)
 
 
 Username should be changed to ```postgres```
 Default password == ```weatherapp```
 
 Open query tool and paste contents of ```SQL.txt``` file from ```Weather_project``` folder, run to create DB tables.
-![create server](static\images\66.png)
+![create server](examples\66.png)
 
 #### Step 2
 Install dependencies
-![create server](static\images\77.png)
+![create server](examples\77.png)
 Note that path to requirements.txt will be different!
 
 #### Step 3
 Create ```.env``` file in your ```Weather_project``` folder and set up next credentials:
-![create server](static\images\88.png)
+![create server](examples\88.png)
 Note that FLASK_SECRED_KEY can be omitted!
 
 #### Step 4
