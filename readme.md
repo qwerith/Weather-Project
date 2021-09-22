@@ -44,7 +44,7 @@ After cloning repo via git ```git clone https://github.com/qwerith/Weather-Proje
 
 After container has been composed, open pg admin in the browser, log in
 
-![log in](examples\2.png)
+![log in](examples/2.PNG)
 
 (default credentials are ```yuriisorokin98@gmail.com``` and ```weatherapp```)
 
