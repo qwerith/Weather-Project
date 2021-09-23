@@ -109,7 +109,7 @@ Powershell = ```> $env:FLASK_APP = "app"```<br>```> flask run```
 [2]: (https://www.openstreetmap.org)
 [3]: (https://cs50.harvard.edu/web/2020)
 [4]: (https://leafletjs.com)
-[5]: (https://github.com/qwerith/Weather-Project)
+[5]: (https://qweatherapp.herokuapp.com)
 
 #### Attributions:
 Original code snippet for Leaflet set up with OWM was made by [Godnik](https://github.com/owm-inc/VANE-intro/blob/master/apps/leaflet-owm.html) is licensed by [MIT](https://opensource.org/licenses/MIT)
