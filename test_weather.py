@@ -1,8 +1,16 @@
-import pytest
-from weather import *
+import pytest, re, logging
 from datetime import datetime
 from requests.models import Response
-from weather import *
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s:%(name)s:%(filename)s:%(funcName)s:%(levelname)s:%(message)s")
+handler = logging.FileHandler("logs.log")
+handler.setFormatter(formatter)
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
+    
 
 data = {
   "cod": "200",
@@ -68,6 +76,36 @@ final_data_list = [[('2021-09-16 15:00:00', {'min_temp': '21.29', 'max_temp': '2
 'Lat': '50.4333', 'Lon': '30.5167', 'country': 'UA', 'sunrise': '1631763305', 'sunset': '1631808644', 'timezone': '3', 'pop': 0.0})], [('2021-09-15 15:00:00', {'min_temp': '21.29', 'max_temp': '21.42', 
 'humidity': '46', 'conditions': 'clear sky', 'picture_name': '01d', 'wind': '27', 'wind_speed': 1, 'ID': 703448, 'Location': 'Kyiv', 'Lat': '50.4333', 'Lon': '30.5167', 'country': 'UA', 'sunrise': '1631763305', 'sunset': '1631808644', 'timezone': '3', 'pop': 0.0})]]
 
+def input_type_check(location):
+    pattern = '.*(\d{2,}).*(\d{2,}).*'
+    return "name" if not re.search(pattern, location) else "coords"
+
+def convert_location_to_query(location):
+    #if input is coordinates, regex uses "pattern_replace" variable to strips all characters not noted in "[^. -1234567890]"
+    pattern_replace = "[^. -1234567890]"
+    if input_type_check(location) == "name":
+        location = "q=" + location.capitalize()
+    else:
+        location = re.sub(pattern_replace,'',location)
+        #divides coordinates string into two parts (latitude and longitude) and strips them from all characters noted in "[,'"!@#$%^&*()_+=|/?>,<`~]"
+        location = (re.sub(r'''[,'"!@#$%^&*()_+=|/?>,<`~]''',"", location)).strip(" ").split(" ")
+        lat = "lat=" + str(location[0])
+        lon = "&lon=" + str(location[-1])
+        location = lat + lon
+    logger.info(location)
+    return location
+
+
+def get_input(location):
+    #location = input("Enter location name: ")
+    if type(location) != str:
+        logger.warning(location)
+        return "q=Lviv"
+    if len(location) > 72 or len(location) <= 2:
+        location = "q=Lviv"
+    else:
+        location = convert_location_to_query(location)
+    return location
 
 def test_convert_location_to_query():
   result = convert_location_to_query("lviv")
