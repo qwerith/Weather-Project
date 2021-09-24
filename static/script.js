@@ -2,7 +2,7 @@ function manageMap(lat, lon) {
     var map = L.map('map').setView([lat, lon], 10);
         map.setMaxBounds(map.getBounds()); 
         
-    var baseMaps = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    var baseMaps = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 15,
         minZoom: 9,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

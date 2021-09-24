@@ -16,7 +16,7 @@ This App was developed as final project for [CS50's Web programing][3] course.
 
 App is based on Flask framework, Postgresql DB.  Mailing is preformed using smtplib, note that current default send time is 5:00 am UTC. Application provides visual info about cloud coverage, precipitation, temperature by placing particular layers over map using [Leaflet][4] library. Aside from account credentials storage, postgres is used to store cache, thus diminishing number of calls to the OWM API.
 
-#### Here is [live demo][5]
+#### Here is [live demo](https://qweatherapp.herokuapp.com)
 
 <details><summary style="cursor:pointer;">hint</summary>
 
@@ -104,13 +104,13 @@ Powershell = ```> $env:FLASK_APP = "app"```<br>```> flask run```
 - Add localization :ukraine:
 
 
+#### Attributions:
+Original code snippet for Leaflet set up with OWM was made by [Godnik](https://github.com/owm-inc/VANE-intro/blob/master/apps/leaflet-owm.html) is licensed by [MIT](https://opensource.org/licenses/MIT)
+Original code snippet for login/register page was made by [Syanaputra]("https://bootsnipp.com/syanaputra")
+
 
 [1]: (https://openweathermap.org)
 [2]: (https://www.openstreetmap.org)
 [3]: (https://cs50.harvard.edu/web/2020)
 [4]: (https://leafletjs.com)
-[5]: (https://github.com/qwerith/Weather-Project)
-
-#### Attributions:
-Original code snippet for Leaflet set up with OWM was made by [Godnik](https://github.com/owm-inc/VANE-intro/blob/master/apps/leaflet-owm.html) is licensed by [MIT](https://opensource.org/licenses/MIT)
-Original code snippet for login/register page was made by [Syanaputra]("https://bootsnipp.com/syanaputra")
+[6]: (https://qweatherapp.herokuapp.com)

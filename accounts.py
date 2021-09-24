@@ -30,7 +30,7 @@ class Accounts():
 
     def register(self, username):
         try:
-            con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"), port=5431)
+            con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"), port=5432)
             cur = con.cursor()
         except:
             logger.error(RuntimeError("Database credentials error"))
