@@ -137,9 +137,12 @@ icon.onclick = function() {
     if(document.body.classList.contains("dark-theme")){
         icon.src="/static/images/sun.svg"
         localStorage.setItem("theme", "dark");
+        getElementById("dark_theme_btn").style.title = "Light Theme"
+        
 
     } else {
         icon.src="/static/images/moon.png"
         localStorage.setItem("theme", "light");
+        getElementById("dark_theme_btn").style.title = "Dark Theme"
     }
 }
