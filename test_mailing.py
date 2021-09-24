@@ -27,11 +27,11 @@ class Mailing_Test(unittest.TestCase):
         self.assertEqual(day_of_week("12321231232"), "12321231232")
         self.assertEqual(day_of_week(1), 1)
         
-    def test_set_up_track(self):
-        self.assertEqual(set_up_track(-1, -2), None)
+    #def test_set_up_track(self):
+        #self.assertEqual(set_up_track(-1, -2), None)
     
-    def test_stop_tracking(self):
-        self.assertEqual(stop_tracking("1"), None)
+    #def test_stop_tracking(self):
+        #self.assertEqual(stop_tracking("1"), None)
     
     def test_compose_weather_mail_msg(self):
         self.assertEqual(type(compose_weather_mail_msg(data)), list)

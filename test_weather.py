@@ -96,9 +96,9 @@ class Weather_Test(unittest.TestCase):
         self.assertEqual(type(get_weather("Rome")), RuntimeError)
       self.assertEqual(type(get_weather("""'Drohobych' );  DROP TABLE locations; --' )""")), RuntimeError)
     
-    def test_write_location(self):
-      self.assertRaises(Exception, Cache.write_location, 1, 1)
-      self.assertRaises(Exception, Cache.write_location, data, "Kyiv")
+    #def test_write_location(self):
+      #self.assertRaises(Exception, Cache.write_location, 1, 1)
+      #self.assertRaises(Exception, Cache.write_location, data, "Kyiv")
 
     def test_parse_api_response(self):
       self.assertEqual(type(Cache.parse_api_response(data)), list)
