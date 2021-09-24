@@ -39,8 +39,5 @@ jobs:
         HEROKU_API_TOKEN: ${{ secrets.HEROKU_API_TOKEN }}
         heroku_app_name: qweatherapp
         heroku_email: "yuriisorokin98@gmail.com"
-      if: github.ref == 'refs/heads/master' && job.status == 'success'
-      run: |
-        git remote add heroku https://heroku:${{ secrets.HEROKU_API_TOKEN }}git.heroku.com/qweatherapp.git
-        git push heroku HEAD:master -f
+      
     
