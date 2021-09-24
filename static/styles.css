@@ -234,6 +234,8 @@
 
 #navbar {
     padding: 3px 0 3px 0;
+    min-width: 650px;
+    width: 100%;
 }
 
 #container {

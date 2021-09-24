@@ -63,6 +63,14 @@ function manageMap(lat, lon) {
         });
 } 
 
+$("input, textarea").focusout(function(){
+$('meta[name=viewport]').remove();
+$('head').append('<meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=0">');
+
+$('meta[name=viewport]').remove();
+$('head').append('<meta name="viewport" content="width=device-width, initial-scale=yes">' );
+});
+
 window.onload = function positionNew() {
     var width = $(window).width();
     if (width < 1401) {
