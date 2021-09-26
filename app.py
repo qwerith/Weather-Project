@@ -19,7 +19,6 @@ logger.addHandler(handler)
 # Map-tiles url
 url_root = "http://tile.openweathermap.org/map" 
 temp_storage = []
-location_list = [{"search_0" : False}, {"search_1" : False}, {"search_2" : False}]
 load_dotenv(find_dotenv())
 secret_key = os.getenv("FLASK_SECRET_KEY")
 
@@ -49,9 +48,9 @@ def index():
             return render_template('index.html', status=STATUS)
         else:
             DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
-            search_result = Quick_search.create_quick_search(location, location_list)
             if session.get("user_id") != None:
-                print(search_result)
+                location_list = Quick_search.find_cache()
+                search_result = Quick_search.create_quick_search(location, location_list)
                 Quick_search.write_quick_search_buffer(search_result)
                 search_result = Quick_search.query_quick_search()
             else:
@@ -266,6 +265,15 @@ def get_tile(tile_name,z,x,y):
 class Quick_search():
     """Manages quick search info, saves into buffer, queries info on call, deletes"""
 
+    def find_cache():
+        for i in temp_storage:
+            if i.get(session.get("user_id")):
+                v = list(i.values())
+                search_list = v[0]
+                print(search_list)
+                return search_list
+        return [{"search_0" : False}, {"search_1" : False}, {"search_2" : False}]
+
     def write_quick_search_buffer(search_result):
         for i in temp_storage:
             if i.get(session.get("user_id")):
@@ -281,26 +289,27 @@ class Quick_search():
                 return True
         return False
 
-    def create_quick_search(location, location_list):
-        if location not in [location_list[0]["search_0"], location_list[1]["search_1"], location_list[2]["search_2"]]:
-            if location_list[0]["search_0"] == None:
-                location_list[0].update({"search_0" : location})
-            elif location_list[0]["search_0"] != None and location_list[1]["search_1"] == None:
-                location_list[1].update({"search_1" : location_list[0]["search_0"]})
-                location_list[0] = ({"search_0" : location})
+    def create_quick_search(location, search_list):
+        if location not in [search_list[0]["search_0"], search_list[1]["search_1"], search_list[2]["search_2"]]:
+            if search_list[0]["search_0"] == None:
+                search_list[0].update({"search_0" : location})
+            elif search_list[0]["search_0"] != None and search_list[1]["search_1"] == None:
+                search_list[1].update({"search_1" : search_list[0]["search_0"]})
+                search_list[0] = ({"search_0" : location})
             else:
-                location_list[2].update({"search_2":location_list[1]["search_1"]})
-                location_list[1].update({"search_1":location_list[0]["search_0"]})
-                location_list[0] = ({"search_0" : location})
-        return location_list
+                search_list[2].update({"search_2":search_list[1]["search_1"]})
+                search_list[1].update({"search_1":search_list[0]["search_0"]})
+                search_list[0] = ({"search_0" : location})
+        return search_list
     
     def query_quick_search():
-        if session.get("user_id") != None and session.get("user_id") in temp_storage:
+        search_list = [{"search_0" : False}, {"search_1" : False}, {"search_2" : False}]
+        if session.get("user_id") != None:
             for i in temp_storage:
                 if i.get(session["user_id"]):
-                    return {session["user_id"]:i}
-            return {"Unknown": location_list}
-        return {"Unknown": location_list}
+                    return i
+            return {"Unknown": search_list}
+        return {"Unknown": search_list}
 
 
 # Checks if track request already exists
