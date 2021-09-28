@@ -48,7 +48,7 @@ def create_html_table_rows(data):
         if count < length:
             table_row = f"""<tr>
                                 <td style="padding: 0 10px;align-items:center;text-align:center;">{data[0][count][0].split(" ")[1][:5]}</td>
-                                <td style="padding: 0 5%;min-width:160px;align-items:center;text-align:center;"> {data[0][count][1]["min_temp"]} / {data[0][count][1]["max_temp"]}°</td>
+                                <td style="padding: 0 5%;min-width:160px;align-items:center;text-align:center;"> {int(round(float(data[0][count][1]["min_temp"])))} / {int(round(float(data[0][count][1]["max_temp"])))}°</td>
                                 <td style="padding: 0 2%;align-items:center;text-align:center;">{data[0][count][1]["humidity"]}%</td>
                                 <td style="padding: 0 5%;align-items:center;text-align:center;">{int(round(float(data[0][count][1]["pop"])* 100))}%</td>
                                 <td style="padding: 0 10px;align-items:center;text-align:center;">{data[0][count][1]["conditions"]}</td>
