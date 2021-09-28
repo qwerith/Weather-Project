@@ -5,8 +5,11 @@ from accounts import Accounts, input_validation, login_required, generate_tempor
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv, find_dotenv
 from mailing import send_gmail, day_of_week, set_up_track, compose_weather_mail_msg, stop_tracking, compose_recovery_mail_msg
-from flask import Response
+from flask import Response, make_response, jsonify
 from datetime import datetime, timedelta
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -37,7 +40,17 @@ app.secret_key = secret_key
 bcrypt = Bcrypt(app)
 
 
+limiter = Limiter(app, key_func=get_remote_address)
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return make_response(
+            jsonify(error="ratelimit exceeded code 429, %s" % e.description)
+            , 429
+    )
+
 @app.route('/', methods=["GET", "POST"])
+@limiter.limit("3000/minute")
 def index():
     if request.method == "POST" and request.form.get("location"):
         location = request.form.get("location").capitalize()
@@ -61,6 +74,7 @@ def index():
 
 
 @app.route("/register", methods=["GET", "POST"])
+@limiter.limit("30/minute;300/day;")
 def register():
     form = [request.form.get("username"), request.form.get("email"), request.form.get("password"), request.form.get("confirm_password")]
     if request.method == "POST" and all(char != "" for char in form) and len(form[0]) < 20:
@@ -82,6 +96,7 @@ def register():
 
 
 @app.route("/login", methods=["GET", "POST"])
+@limiter.limit("60/minute")
 def login():
     if request.method == "POST" and request.form.get("email") != "" and request.form.get("password") != "":
         session.pop("user_id", None)
@@ -97,7 +112,6 @@ def login():
                 session["user_id"] = user[1][0][0]
                 session["username"] = user[1][0][1]
                 session["email"] = user[1][0][2]    
-                print(session["user_id"])
                 return redirect("/")
             else:
                 flash(["Wrong email or password"], "info")
@@ -118,12 +132,11 @@ def logout():
 
 @login_required
 @app.route("/delete", methods=["GET", "POST"])
+@limiter.limit("20/minute")
 def delete():
     if request.method == "POST" and request.form.get("password") != "":
         input_valid = input_validation([session["email"], request.form.get("password")])
-        print(session["email"])
         if input_valid != []:
-            print("test")
             flash(input_valid, "info")
             return render_template("delete.html")
         user = Accounts(session["email"], request.form.get("password"))
@@ -140,6 +153,7 @@ def delete():
 
 @login_required
 @app.route("/change_password", methods=["GET", "POST"])
+@limiter.limit("30/minute;300/day")
 def change_password():
     if request.method == "POST" and request.form.get("password") != "":
         input_valid = input_validation([session["email"], request.form.get("password"),
@@ -158,6 +172,7 @@ def change_password():
 
 
 @app.route("/restore_password", methods=["GET", "POST"])
+@limiter.limit("20/minute;50/day")
 def restore_password():
     if request.method == "POST":
         input_valid = input_validation([session.get("recovery_email"), request.form.get("temp_passsword"), request.form.get("password_new"), request.form.get("password_new_confirm")])
@@ -204,6 +219,7 @@ def send_temporary_password():
 
 @login_required
 @app.route("/track", methods=["POST"])
+@limiter.limit("50/minute;500/day")
 def track():
     #regex removes <'" ()> from request.form.get("location") value
     filter = """['" ()]"""
@@ -213,7 +229,6 @@ def track():
         session.pop("track_name", None)
         location_name = re.sub(filter,"",request.form.get("location")).split(",")[0]
         location_id = re.sub(filter,"",request.form.get("location")).split(",")[1]
-        print(location_name, location_id)
         session["track"] = location_id
         session["track_name"] = location_name
         DATA = get_weather(location_name)
@@ -241,7 +256,6 @@ def stop_track():
                 return redirect("/")
             else: 
                 DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
-                print(search_result)
                 user_info = session["user_id"]
                 logger.info(f"User {user_info} stopped tracking!")
                 return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
@@ -249,12 +263,16 @@ def stop_track():
 
 
 @app.route("/map/<tile_name>/<z>/<x>/<y>")
+@limiter.limit("200/minute;1500/day")
 def get_tile(tile_name,z,x,y):
-    print(tile_name,z,x,y)
-    tile_name = tile_name.split("=")[1]
-    z = int(float(z.split("=")[1]))
-    x = int(float(x.split("=")[1]))
-    y = int(float(y.split("=")[1]))
+    try:
+        tile_name = tile_name.split("=")[1]
+        z = int(float(z.split("=")[1]))
+        x = int(float(x.split("=")[1]))
+        y = int(float(y.split("=")[1]))
+    except:
+        logger.warning("Map request error, 400")
+        return None
     req = requests.get(f"{url_root}/{tile_name}/{z}/{x}/{y}.png?appid={app_key}")
     if req.status_code != 200:
         logger.warning(f"Map request error {req.status_code}")
@@ -264,13 +282,12 @@ def get_tile(tile_name,z,x,y):
 
 class Quick_search():
     """Manages quick search info, saves into buffer, queries info on call, deletes"""
-
+    
     def find_cache():
         for i in temp_storage:
             if i.get(session.get("user_id")):
                 v = list(i.values())
                 search_list = v[0]
-                print(search_list)
                 return search_list
         return [{"search_0" : False}, {"search_1" : False}, {"search_2" : False}]
 
@@ -290,6 +307,7 @@ class Quick_search():
         return False
 
     def create_quick_search(location, search_list):
+        #search_list = [{"search_0" : False}, {"search_1" : False}, {"search_2" : False}]
         if location not in [search_list[0]["search_0"], search_list[1]["search_1"], search_list[2]["search_2"]]:
             if search_list[0]["search_0"] == None:
                 search_list[0].update({"search_0" : location})

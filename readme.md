@@ -15,6 +15,7 @@ This App was developed as final project for [CS50's Web programing][3] course.
 * Weather data caching :package:
 
 App is based on Flask framework, Postgresql DB.  Mailing is preformed using smtplib, note that current default send time is 5:00 am UTC. Application provides visual info about cloud coverage, precipitation, temperature by placing particular layers over map using [Leaflet][4] library. Aside from account credentials storage, postgres is used to store cache, thus diminishing number of calls to the OWM API.
+Note that app was made for desktop usage.
 
 #### Here is [live demo](https://qweatherapp.herokuapp.com)
 
