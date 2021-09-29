@@ -50,7 +50,7 @@ def ratelimit_handler(e):
     )
 
 @app.route('/', methods=["GET", "POST"])
-@limiter.limit("3000/minute")
+@limiter.limit("3000 per minute")
 def index():
     if request.method == "POST" and request.form.get("location"):
         location = request.form.get("location").capitalize()
@@ -74,7 +74,7 @@ def index():
 
 
 @app.route("/register", methods=["GET", "POST"])
-@limiter.limit("30/minute;300/day;")
+@limiter.limit("60 per day;")
 def register():
     form = [request.form.get("username"), request.form.get("email"), request.form.get("password"), request.form.get("confirm_password")]
     if request.method == "POST" and all(char != "" for char in form) and len(form[0]) < 20:
@@ -96,7 +96,7 @@ def register():
 
 
 @app.route("/login", methods=["GET", "POST"])
-@limiter.limit("60/minute")
+@limiter.limit("60 per minute")
 def login():
     if request.method == "POST" and request.form.get("email") != "" and request.form.get("password") != "":
         session.pop("user_id", None)
@@ -132,7 +132,7 @@ def logout():
 
 @login_required
 @app.route("/delete", methods=["GET", "POST"])
-@limiter.limit("20/minute")
+@limiter.limit("20 per minute")
 def delete():
     if request.method == "POST" and request.form.get("password") != "":
         input_valid = input_validation([session["email"], request.form.get("password")])
@@ -153,7 +153,7 @@ def delete():
 
 @login_required
 @app.route("/change_password", methods=["GET", "POST"])
-@limiter.limit("30/minute;300/day")
+@limiter.limit("30 per minute")
 def change_password():
     if request.method == "POST" and request.form.get("password") != "":
         input_valid = input_validation([session["email"], request.form.get("password"),
@@ -172,7 +172,7 @@ def change_password():
 
 
 @app.route("/restore_password", methods=["GET", "POST"])
-@limiter.limit("20/minute;50/day")
+@limiter.limit("20 per minute")
 def restore_password():
     if request.method == "POST":
         input_valid = input_validation([session.get("recovery_email"), request.form.get("temp_passsword"), request.form.get("password_new"), request.form.get("password_new_confirm")])
@@ -219,7 +219,7 @@ def send_temporary_password():
 
 @login_required
 @app.route("/track", methods=["POST"])
-@limiter.limit("50/minute;500/day")
+@limiter.limit("50 per minute")
 def track():
     #regex removes <'" ()> from request.form.get("location") value
     filter = """['" ()]"""
@@ -263,7 +263,7 @@ def stop_track():
 
 
 @app.route("/map/<tile_name>/<z>/<x>/<y>")
-@limiter.limit("200/minute;1500/day")
+@limiter.limit("300 per minute")
 def get_tile(tile_name,z,x,y):
     try:
         tile_name = tile_name.split("=")[1]
