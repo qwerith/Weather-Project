@@ -103,7 +103,7 @@ def login():
         input_valid = input_validation([request.form.get("email"), request.form.get("password")])
         if input_valid != []:
             flash(input_valid, "info")
-            return render_template("login.html") 
+            return redirect("login") 
         else:
             user = Accounts(request.form.get("email"), request.form.get("password"))
             user = user.user_verification()
@@ -178,7 +178,7 @@ def restore_password():
         input_valid = input_validation([session.get("recovery_email"), request.form.get("temp_passsword"), request.form.get("password_new"), request.form.get("password_new_confirm")])
         if input_valid != []:
             flash(input_valid, "info")
-            return render_template("restore_password.html")
+            return redirect("restore_password")
         temp_password_hash = session.get("temporary_password_hash")
         if temp_password_hash:
             user = Accounts(session.get("recovery_email"), request.form.get("password_new"))
@@ -198,7 +198,7 @@ def send_temporary_password():
         input_valid = input_validation([request.form.get("email"), "Unknown"])
         if input_valid != []:
             flash(input_valid, "info")
-            return render_template("send_temporary_password.html")
+            return redirect("send_temporary_password")
         session["recovery_email"] = request.form.get("email") 
         temp_password = generate_temporary_password(request.form.get("email"))
         session["temporary_password_hash"] = temp_password[0]
