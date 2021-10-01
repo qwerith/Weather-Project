@@ -50,8 +50,9 @@ def ratelimit_handler(e):
     )
 
 @app.route('/', methods=["GET", "POST"])
-@limiter.limit("3000 per minute")
+@limiter.limit("500 per minute")
 def index():
+    print(f"test1{temp_storage}")
     if request.method == "POST" and request.form.get("location"):
         location = request.form.get("location").capitalize()
         print(location)
@@ -66,6 +67,7 @@ def index():
                 search_result = Quick_search.create_quick_search(location, location_list)
                 Quick_search.write_quick_search_buffer(search_result)
                 search_result = Quick_search.query_quick_search()
+                print(search_result)
             else:
                 search_result = None
         return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result)
@@ -73,37 +75,77 @@ def index():
         return render_template("index.html")
 
 
-@app.route("/register", methods=["GET", "POST"])
-@limiter.limit("60 per day;")
-def register():
+@app.route('/weather/<place>', methods=["GET", "POST"])
+@limiter.limit("500 per minute")
+def weather(place):
+    print(f"test1{temp_storage}")
+    try:
+        location = str(place).capitalize()
+        location = location.split("=")[1]
+    except:
+        redirect("/")
+    if location not in [None, "None", "none"]:
+        print(location)
+        DATA = get_weather(location)
+        STATUS = f"{location} not found"
+        if type(DATA) == RuntimeError:
+            return render_template('index.html', status=STATUS)
+        else:
+            DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
+            if session.get("user_id") != None:
+                location_list = Quick_search.find_cache()
+                search_result = Quick_search.create_quick_search(location, location_list)
+                Quick_search.write_quick_search_buffer(search_result)
+                search_result = Quick_search.query_quick_search()
+                print(search_result)
+            else:
+                search_result = None
+        return render_template("weather.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result, url_for=url_for)
+    else:
+        return redirect("/")
+
+
+@app.route("/register/<place>", methods=["GET", "POST"])
+@limiter.limit("60 per houre")
+def register(place):
+    try:
+        place = str(place).capitalize()
+        place = place.split("=")[1]
+    except:
+        redirect("/")
     form = [request.form.get("username"), request.form.get("email"), request.form.get("password"), request.form.get("confirm_password")]
     if request.method == "POST" and all(char != "" for char in form) and len(form[0]) < 20:
         input_valid = input_validation(form[1:4])
         form.clear()
         if not input_valid == []:     
             flash(input_valid, "info")
-            return render_template("register.html")
+            return redirect(f"/register/{place}")
         else:
             user = Accounts(request.form.get("email"), request.form.get("password"))
             user_status = user.register(request.form.get("username"))
             flash(user_status, "info")
             user_info = request.form.get("email")
             logger.info(f"User {user_info} registration status, {user_status}")
-            return redirect(url_for("login"))
+            return redirect(f"/login/{place}")
     else:
         form.clear()
-        return render_template("register.html")
+        return render_template("register.html", place=place)
 
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/login/<place>", methods=["GET", "POST"])
 @limiter.limit("60 per minute")
-def login():
+def login(place):
+    try:
+        place = str(place).capitalize()
+        place = place.split("=")[1]
+    except:
+        redirect("/")
     if request.method == "POST" and request.form.get("email") != "" and request.form.get("password") != "":
         session.pop("user_id", None)
         input_valid = input_validation([request.form.get("email"), request.form.get("password")])
         if input_valid != []:
             flash(input_valid, "info")
-            return redirect("login") 
+            return redirect(f"/login/{place}")
         else:
             user = Accounts(request.form.get("email"), request.form.get("password"))
             user = user.user_verification()
@@ -112,12 +154,15 @@ def login():
                 session["user_id"] = user[1][0][0]
                 session["username"] = user[1][0][1]
                 session["email"] = user[1][0][2]    
+                print(session["user_id"])
+                if place != "none":
+                    return redirect(f"/weather/{place}")
                 return redirect("/")
             else:
                 flash(["Wrong email or password"], "info")
-                return render_template("login.html")        
+                return redirect(f"/login/{place}")        
     else:
-        return render_template("login.html")
+        return render_template("login.html", place=place)
 
 
 @login_required
@@ -131,74 +176,97 @@ def logout():
 
 
 @login_required
-@app.route("/delete", methods=["GET", "POST"])
-@limiter.limit("20 per minute")
-def delete():
+@app.route("/delete/<place>", methods=["GET", "POST"])
+@limiter.limit("30 per minute")
+def delete(place):
+    try:
+        place = str(place).capitalize()
+        place = place.split("=")[1]
+    except:
+        redirect("/")
     if request.method == "POST" and request.form.get("password") != "":
         input_valid = input_validation([session["email"], request.form.get("password")])
+        print(session["email"])
         if input_valid != []:
+            print("test")
             flash(input_valid, "info")
-            return render_template("delete.html")
+            return render_template("delete.html", place=place)
         user = Accounts(session["email"], request.form.get("password"))
         if user.user_verification():
             user_info = session["email"]
+            stop_tracking(session["user_id"])
             user.delete()
             Quick_search.clear_buffer()
             logger.info(f"User {user_info} has been deleted successfully!")
             session.pop("user_id", None)
             return redirect("/")
-        return redirect("/delete")
-    return render_template("delete.html")
+        return redirect(f"/delete/{place}")
+    return render_template("delete.html", place=place)
 
 
 @login_required
-@app.route("/change_password", methods=["GET", "POST"])
+@app.route("/change_password/<place>", methods=["GET", "POST"])
 @limiter.limit("30 per minute")
-def change_password():
+def change_password(place):
+    try:
+        place = str(place).capitalize()
+        place = place.split("=")[1]
+    except:
+        redirect("/")
     if request.method == "POST" and request.form.get("password") != "":
         input_valid = input_validation([session["email"], request.form.get("password"),
         request.form.get("password_new"), request.form.get("password_new_confirm")])
         if input_valid != []:
             flash(input_valid, "info")
-            return redirect("/change_password")
+            return redirect(f"/change_password/{place}")
         user = Accounts(session["email"], request.form.get("password"))
         if user.user_verification():
             user.change_password(request.form.get("password_new"))
             user_info = session["user_id"]
             logger.info(f"User {user_info} password has been changed!")
-            return redirect("/")
-        return redirect("/change_password")
-    return render_template("change_password.html")
+            return redirect(f"/weather/{place}")
+        return redirect(f"/change_password/{place}")
+    return render_template("change_password.html", place=place)
 
 
-@app.route("/restore_password", methods=["GET", "POST"])
+@app.route("/restore_password/<place>", methods=["GET", "POST"])
 @limiter.limit("20 per minute")
-def restore_password():
+def restore_password(place):
+    try:
+        place = str(place).capitalize()
+        place = place.split("=")[1]
+    except:
+        redirect("/")
     if request.method == "POST":
         input_valid = input_validation([session.get("recovery_email"), request.form.get("temp_passsword"), request.form.get("password_new"), request.form.get("password_new_confirm")])
         if input_valid != []:
             flash(input_valid, "info")
-            return redirect("restore_password")
+            return redirect(f"/restore_password/{place}")
         temp_password_hash = session.get("temporary_password_hash")
         if temp_password_hash:
             user = Accounts(session.get("recovery_email"), request.form.get("password_new"))
             if not user.restore_password(temp_password_hash, request.form.get("temp_passsword")):
-                return redirect("/restore_password")
+                return redirect(f"/restore_password/{place}")
             user_info = session["recovery_email"]
             logger.info(f"User {user_info} successfully recovered account!")
             session.pop("temporary_password_hash", None)
-            return redirect("/login")
-        return redirect("/send_temporary_password")
-    return render_template("restore_password.html")
+            return redirect(f"/login/{place}")
+        return redirect(f"/send_temporary_password/{place}")
+    return render_template("restore_password.html", place=place)
 
 
-@app.route("/send_temporary_password", methods=["GET", "POST"])
-def send_temporary_password():
+@app.route("/send_temporary_password/<place>", methods=["GET", "POST"])
+def send_temporary_password(place):
+    try:
+        place = str(place).capitalize()
+        place = place.split("=")[1]
+    except:
+        redirect("/")
     if request.method == "POST":
         input_valid = input_validation([request.form.get("email"), "Unknown"])
         if input_valid != []:
             flash(input_valid, "info")
-            return redirect("send_temporary_password")
+            return redirect(f"/send_temporary_password/{place}")
         session["recovery_email"] = request.form.get("email") 
         temp_password = generate_temporary_password(request.form.get("email"))
         session["temporary_password_hash"] = temp_password[0]
@@ -207,20 +275,26 @@ def send_temporary_password():
         else:
             logger.warning(TypeError("Excpected password value of type string"))
             flash("Account does not exist", "info")
-            return render_template("send_temporary_password.html")
+            return redirect(f"send_temporary_password/{place}")
         send_gmail(message, request.form.get("email"))
         message = None
         temp_password = None
         user_info = request.form.get("email")
         logger.info(f"Temporary password was sent to {user_info}")
-        return redirect("/restore_password")
-    return render_template("send_temporary_password.html")
+        return redirect(f"/restore_password/{place}")
+    return render_template("send_temporary_password.html", place=place)
 
 
 @login_required
-@app.route("/track", methods=["POST"])
+@app.route("/track/<place>", methods=["POST"])
 @limiter.limit("50 per minute")
-def track():
+def track(place):
+    try:
+        place = str(place).capitalize()
+        place = place.split("=")[1]
+    except:
+        redirect("/")
+    STATUS = "You already track this location!"
     #regex removes <'" ()> from request.form.get("location") value
     filter = """['" ()]"""
     if request.method == "POST" and check_session(request.form.get("location")) == None:
@@ -237,9 +311,9 @@ def track():
             send_gmail(compose_weather_mail_msg(DATA), session["email"])
             user_info = session["user_id"]
             logger.info(f"User {user_info} started tracking!")
-            return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
-        return redirect("/")
-    return redirect("/")
+            return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result)
+        return render_template("weather.html", place=place, status=STATUS)
+    return render_template("weather.html", place=place, status=STATUS)
 
 
 @login_required
@@ -252,7 +326,7 @@ def stop_track():
         if stop_tracking(session["user_id"]):
             location_name = request.form.get("location")
             DATA = get_weather(location_name)
-            if type(DATA) == RuntimeError:
+            if type(DATA) == RuntimeError or len(location_name) < 2:
                 return redirect("/")
             else: 
                 DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])

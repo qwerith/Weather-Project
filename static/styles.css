@@ -25,6 +25,7 @@
 
 #body_main {
     background-color: var(--main-bg-color);
+    width: 100%;
 }
 
 #dark_theme_btn {
@@ -113,6 +114,18 @@
 #btn_search_main {
     background-color: var(--sixth-color);
     color: var(--secondary-color);
+}
+
+#search_main {
+    width: 100%;
+    padding: .375rem .20rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
 }
 
 #btn_search_main:hover {
@@ -241,6 +254,7 @@
 #container {
     position: relative;
     max-width: 100%;
+    width: 100%;
     padding: 0;
 }
 
