@@ -178,7 +178,7 @@ def compose_weather_mail_msg(data):
             <br>
             <div>
                 <h4> {data[0][0][1]['Location']} Id: {data[0][0][1]['ID']} Lat: {data[0][0][1]['Lat']} Lon: {data[0][0][1]['Lon']} </h4>
-                <h4> Sunrise: {data[0][0][1]['sunrise']} Sunset: {data[0][0][1]['sunset']} </h4>
+                <h4> Sunrise: {str(data[0][0][1]['sunrise'])} Sunset: {str(data[0][0][1]['sunset'])} </h4>
             </div>
         </body>
         </html>
