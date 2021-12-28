@@ -215,7 +215,7 @@
             </div>
         {% endif %}
         
-<script src="static/script.js"></script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 <script>
     var lat = "{{lat}}", lon = "{{lon}}";
     manageMap(lat, lon)
