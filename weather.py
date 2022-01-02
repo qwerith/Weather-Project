@@ -107,8 +107,8 @@ def get_weather(location_input):
         raise
     check = cache_check(location_input)
     if check[0] == None:
-        request = requests.get(f"""http://api.openweathermap.org/data/2.5/forecast?
-                                {location_input}&units=metric&appid={API_KEY}""")
+        request = requests.get(
+            f"""http://api.openweathermap.org/data/2.5/forecast?{location_input}&units=metric&appid={API_KEY}""")
         print(request.status_code)
         #parsed = request.json()
         #print(json.dumps(parsed, indent=4, sort_keys=True))
@@ -150,11 +150,11 @@ class Cache():
         try:
             print(datetime.fromtimestamp(request_data["city"]["sunset"]))
             cur.execute("""INSERT INTO location (id, location_name, lat, lon,
-                            request_date, country, sunrise, sunset, timezone)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                            (db_location[0], db_location[1], db_location[2],
-                            db_location[3], db_location[4], db_location[5],
-                            db_location[6], db_location[7], db_location[8]))
+                        request_date, country, sunrise, sunset, timezone)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                        (db_location[0], db_location[1], db_location[2],
+                        db_location[3], db_location[4], db_location[5],
+                        db_location[6], db_location[7], db_location[8]))
             con.commit()
         except Exception:
             logger.exception("Cache Operation Error")
@@ -185,9 +185,10 @@ class Cache():
     #updates "reques_date" row in "location" table if weather data is outdated
     def write_weather(request_data, status):
         count = 0
-        command = """INSERT INTO weather (date, min_temp, max_temp, humidity, conditions,
-                                        wind, picture_name, location_id, wind_speed, pop) 
-                                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        command = """INSERT INTO weather 
+                    (date, min_temp, max_temp, humidity, conditions,
+                    wind, picture_name, location_id, wind_speed, pop) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         location_id = request_data["city"]["id"]
         db_weather = Cache.parse_api_response(request_data)
         #exists = cur.execute("SELECT EXISTS
@@ -196,11 +197,11 @@ class Cache():
         if status == "outdated":
             cur.execute("DELETE FROM weather WHERE location_id=%s", (location_id,))
             cur.execute("""UPDATE location SET 
-                            request_date = %s, sunrise = %s, sunset = %s WHERE id = %s""",
-                            ((datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), 
-                            request_data["city"]["sunrise"],
-                            request_data["city"]["sunset"],
-                            location_id)))
+                        request_date = %s, sunrise = %s, sunset = %s WHERE id = %s""",
+                        ((datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), 
+                        request_data["city"]["sunrise"],
+                        request_data["city"]["sunset"],
+                        location_id)))
         for i in db_weather:
             cur.execute(command,(datetime.fromtimestamp(db_weather[count][0]),
                         db_weather[count][1], db_weather[count][2],
@@ -252,10 +253,10 @@ class Cache():
     def read(id):
         try:
             cur.execute("""SELECT date, min_temp, max_temp, humidity, conditions,
-                            picture_name, wind, wind_speed, location_id, location_name, lat, lon,
-                            country, sunrise, sunset, timezone, pop 
-                            FROM weather INNER JOIN location ON weather.location_id=location.id
-                            WHERE location_id=%s ORDER BY date ASC""", (id, ))
+                        picture_name, wind, wind_speed, location_id, location_name, lat, lon,
+                        country, sunrise, sunset, timezone, pop 
+                        FROM weather INNER JOIN location ON weather.location_id=location.id
+                        WHERE location_id=%s ORDER BY date ASC""", (id, ))
             query_result = cur.fetchall()
             con.commit()
         except:

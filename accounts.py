@@ -53,9 +53,9 @@ class Accounts():
             return ["Account already exists"]  
         else:
             try:
-                cur.execute("INSERT INTO users (username, email, password) VALUES ( %s, %s, %s )",
-                            (username.strip(" "), self.email,
-                            bcrypt.generate_password_hash(self.password).decode("utf-8")))
+                cur.execute("""INSERT INTO users (username, email, password) 
+                                VALUES ( %s, %s, %s )""",(username.strip(" "), self.email,
+                                bcrypt.generate_password_hash(self.password).decode("utf-8")))
                 con.commit()
                 con.close()
                 return ["Your account has been successfully created"]

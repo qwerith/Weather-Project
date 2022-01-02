@@ -120,9 +120,9 @@ def register(place):
     except:
         redirect("/")
     form = [
-            request.form.get("username"), request.form.get("email"),
-            request.form.get("password"), request.form.get("confirm_password")
-            ]
+        request.form.get("username"), request.form.get("email"),
+        request.form.get("password"), request.form.get("confirm_password")
+        ]
     if request.method == "POST" and all(char != "" for char in form) and len(form[0]) < 20:
         input_valid = input_validation(form[1:4])
         form.clear()
