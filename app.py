@@ -1,10 +1,14 @@
-import os, re, requests, logging
+import os
+import re
+import requests
+import logging
 from flask import Flask, redirect, request, session, render_template, flash, url_for
 from weather import get_weather
 from accounts import Accounts, input_validation, login_required, generate_temporary_password
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv, find_dotenv
-from mailing import send_gmail, day_of_week, set_up_track, compose_weather_mail_msg, stop_tracking, compose_recovery_mail_msg
+from mailing import send_gmail, day_of_week, set_up_track, compose_weather_mail_msg
+from mailing import stop_tracking, compose_recovery_mail_msg
 from flask import Response, make_response, jsonify
 from datetime import datetime, timedelta
 from flask_limiter import Limiter
@@ -13,7 +17,9 @@ from flask_limiter.util import get_remote_address
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s:%(name)s:%(filename)s:%(funcName)s:%(levelname)s:%(message)s")
+formatter = logging.Formatter("""%(asctime)s:%(name)s:
+                                %(filename)s:%(funcName)s:
+                                %(levelname)s:%(message)s""")
 handler = logging.FileHandler("logs.log")
 handler.setFormatter(formatter)
 handler.setLevel(logging.INFO)
@@ -44,10 +50,8 @@ limiter = Limiter(app, key_func=get_remote_address)
 
 @app.errorhandler(429)
 def ratelimit_handler(e):
-    return make_response(
-            jsonify(error="ratelimit exceeded code 429, %s" % e.description)
-            , 429
-    )
+    return make_response(jsonify(error="ratelimit exceeded code 429, %s" % e.description), 429)
+
 
 @app.route('/', methods=["GET", "POST"])
 @limiter.limit("500 per minute")
@@ -70,7 +74,8 @@ def index():
                 print(search_result)
             else:
                 search_result = None
-        return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result)
+        return render_template("index.html", data=DATA, day_of_week = day_of_week,
+                                compass=compass, search_result=search_result)
     else:
         return render_template("index.html")
 
@@ -100,7 +105,8 @@ def weather(place):
                 print(search_result)
             else:
                 search_result = None
-        return render_template("weather.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result, url_for=url_for)
+        return render_template("weather.html", data=DATA, day_of_week = day_of_week,
+                                compass=compass, search_result=search_result, url_for=url_for)
     else:
         return redirect("/")
 
@@ -113,7 +119,10 @@ def register(place):
         place = place.split("=")[1]
     except:
         redirect("/")
-    form = [request.form.get("username"), request.form.get("email"), request.form.get("password"), request.form.get("confirm_password")]
+    form = [
+            request.form.get("username"), request.form.get("email"),
+            request.form.get("password"), request.form.get("confirm_password")
+            ]
     if request.method == "POST" and all(char != "" for char in form) and len(form[0]) < 20:
         input_valid = input_validation(form[1:4])
         form.clear()
@@ -140,7 +149,9 @@ def login(place):
         place = place.split("=")[1]
     except:
         redirect("/")
-    if request.method == "POST" and request.form.get("email") != "" and request.form.get("password") != "":
+    if (request.method == "POST" and 
+        request.form.get("email") != "" and 
+        request.form.get("password") != ""):
         session.pop("user_id", None)
         input_valid = input_validation([request.form.get("email"), request.form.get("password")])
         if input_valid != []:
@@ -214,8 +225,11 @@ def change_password(place):
     except:
         redirect("/")
     if request.method == "POST" and request.form.get("password") != "":
-        input_valid = input_validation([session["email"], request.form.get("password"),
-        request.form.get("password_new"), request.form.get("password_new_confirm")])
+        input_valid = input_validation([
+                                        session["email"], request.form.get("password"),
+                                        request.form.get("password_new"),
+                                        request.form.get("password_new_confirm")
+                                        ])
         if input_valid != []:
             flash(input_valid, "info")
             return redirect(f"/change_password/{place}")
@@ -238,7 +252,9 @@ def restore_password(place):
     except:
         redirect("/")
     if request.method == "POST":
-        input_valid = input_validation([session.get("recovery_email"), request.form.get("temp_passsword"), request.form.get("password_new"), request.form.get("password_new_confirm")])
+        input_valid = input_validation([session.get("recovery_email"),
+        request.form.get("temp_passsword"), request.form.get("password_new"),
+        request.form.get("password_new_confirm")])
         if input_valid != []:
             flash(input_valid, "info")
             return redirect(f"/restore_password/{place}")
@@ -311,7 +327,8 @@ def track(place):
             send_gmail(compose_weather_mail_msg(DATA), session["email"])
             user_info = session["user_id"]
             logger.info(f"User {user_info} started tracking!")
-            return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result)
+            return render_template("index.html", data=DATA, day_of_week = day_of_week,
+                                    compass=compass, search_result=search_result)
         return render_template("weather.html", place=place, status=STATUS)
     return render_template("weather.html", place=place, status=STATUS)
 
@@ -332,7 +349,8 @@ def stop_track():
                 DATA = convert_timestamp(DATA, DATA[0][0][1]['timezone'])
                 user_info = session["user_id"]
                 logger.info(f"User {user_info} stopped tracking!")
-                return render_template("index.html", data=DATA, day_of_week = day_of_week, compass=compass, search_result=search_result) 
+                return render_template("index.html", data=DATA, day_of_week = day_of_week,
+                                        compass=compass, search_result=search_result) 
     return redirect("/")
 
 
@@ -382,7 +400,8 @@ class Quick_search():
 
     def create_quick_search(location, search_list):
         #search_list = [{"search_0" : False}, {"search_1" : False}, {"search_2" : False}]
-        if location not in [search_list[0]["search_0"], search_list[1]["search_1"], search_list[2]["search_2"]]:
+        if (location not in [search_list[0]["search_0"], 
+            search_list[1]["search_1"], search_list[2]["search_2"]]):
             if search_list[0]["search_0"] == None:
                 search_list[0].update({"search_0" : location})
             elif search_list[0]["search_0"] != None and search_list[1]["search_1"] == None:
@@ -415,7 +434,8 @@ def check_session(location):
 
 
 def convert_timestamp(data, utc_difference):
-    logger.info(f"Function called with {data[0][0][1]['sunrise']}, {data[0][0][1]['sunset']}, {utc_difference}")
+    logger.info(f"""Function called with {data[0][0][1]['sunrise']},
+                {data[0][0][1]['sunset']}, {utc_difference}""")
     sunrise = datetime.fromtimestamp(int(data[0][0][1]['sunrise']))
     sunset = datetime.fromtimestamp(int(data[0][0][1]['sunset']))
     difference_in_hours = timedelta(hours = int(utc_difference))

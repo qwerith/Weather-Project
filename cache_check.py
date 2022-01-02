@@ -1,10 +1,15 @@
-import os, re, psycopg2, logging
+import os
+import re
+import psycopg2
+import logging
 from dotenv import load_dotenv, find_dotenv
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s:%(name)s:%(filename)s:%(funcName)s:%(levelname)s:%(message)s")
+formatter = logging.Formatter("""%(asctime)s:%(name)s:
+                                %(filename)s:%(funcName)s:
+                                %(levelname)s:%(message)s""")
 handler = logging.FileHandler("logs.log")
 handler.setFormatter(formatter)
 handler.setLevel(logging.INFO)
@@ -13,17 +18,22 @@ logger.addHandler(handler)
 #loading environment variables
 try:
     load_dotenv(find_dotenv())
-    con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"), port = 5432)
+    con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"),
+                            user = os.getenv("USER"),password = os.getenv("db_PASSWORD"),
+                            port = 5432)
     cur = con.cursor()
 except psycopg2.OperationalError as e:
     logger.exception("Database credentials error")
     raise RuntimeError("Database credentials error") from e
 
+
 #checks whether input is location name or location coordinates
-#uses "pattern" to define whether input coincides with coordinates, example: """chars(49.3580)chars(23.5123)chars"""
+#uses "pattern" to define whether input coincides with coordinates, example: 
+# """chars(49.3580)chars(23.5123)chars"""
 def input_type_check(location):
     pattern = '.*(\d{2,}).*(\d{2,}).*'
     return "name" if not re.search(pattern, location) else "coords"
+
 
 #compares "request_date" from "location" table with current utc date
 #if "request_date" older then 12 hours(roughly), returns None(means outdated)
@@ -38,8 +48,10 @@ def upd_check(file_time):
     print(dif_in_hours)
     return None if dif_in_hours >= 6 else True
 
+
 #queries "location" table for "request_date" and "location_id"
-#returns output dapanding on data status(True/None,""/"outdated"/"not_exists", id(if data exists and UPD))
+#returns output dapanding on data status(True/None,""/"outdated"/"not_exists",
+# id(if data exists and UPD))
 def cache_check(location):
     if input_type_check(location) == "name":
         parameters = (location[2: ],)
@@ -61,6 +73,7 @@ def cache_check(location):
     except:
         logger.warning(Exception)
         return (None, "not_exists")
+
 
 def check_by_id(id):
     query = "SELECT EXISTS(SELECT 1 FROM location WHERE id = %s LIMIT 1)"

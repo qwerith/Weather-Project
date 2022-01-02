@@ -1,10 +1,13 @@
-import psycopg2, os
+import psycopg2
+import os
 from dotenv import load_dotenv, find_dotenv
 
 #loading environment variables
 try:
     load_dotenv(find_dotenv())
-    con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"), user = os.getenv("USER"), password = os.getenv("db_PASSWORD"), port = 5432)
+    con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"),
+                          user = os.getenv("USER"), password = os.getenv("db_PASSWORD"),
+                          port = 5432)
     cur = con.cursor()
 except psycopg2.OperationalError as e:
     raise RuntimeError("Database credentials error") from e
