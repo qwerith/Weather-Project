@@ -63,9 +63,7 @@ def create_html_table_rows(data):
                 <td style="padding: 0 10px;align-items:center;text-align:center;">
                     {data[0][count][1]["conditions"]}</td>
                 <td style="padding: 0 10px;align-items:center;text-align:center;">
-                    <img src="http://openweathermap.org/img/wn/
-                    {data[0][count][1]["picture_name"]}
-                    @2x.png"alt=""style="width:50px;height:50px;"></td>
+                    <img src="http://openweathermap.org/img/wn/{data[0][count][1]["picture_name"]}@2x.png"alt=""style="width:50px;height:50px;"></td>
                 <td style="padding: 0 10px;align-items:center;text-align:center;">
                     {data[0][count][1]["wind_speed"]} m/s</td>
             </tr>
