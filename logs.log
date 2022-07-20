@@ -1,0 +1,11 @@
+2022-07-20 22:41:58,556:cache_check:
+                                cache_check.py:<module>:
+                                ERROR:Database credentials error
+Traceback (most recent call last):
+  File "/mnt/c/Users/Yura/Documents/AWS/eb-flask/Weather-Project/cache_check.py", line 21, in <module>
+    con = psycopg2.connect(host = os.getenv("HOST"), database = os.getenv("DATABASE"),
+  File "/mnt/c/Users/Yura/Documents/AWS/eb-flask/Weather-Project/.venv/lib/python3.8/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: No such file or directory
+	Is the server running locally and accepting connections on that socket?
+
