@@ -1,6 +1,6 @@
 from weather import get_weather
 from mailing import query_mailing_table, compose_weather_mail_msg, send_gmail
-from app import convert_timestamp
+from application import convert_timestamp
 
 # Called by cron job every morning in 6:00 to send emails with weather data
 def cron_mailing():

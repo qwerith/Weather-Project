@@ -41,6 +41,7 @@ if not app_key:
     raise RuntimeError("OWM map key error")
 
 app = Flask(__name__)
+app = application
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.secret_key = secret_key
 bcrypt = Bcrypt(app)
