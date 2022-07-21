@@ -1,4 +1,6 @@
 function manageMap(lat, lon) {
+    var url = window.location.href;
+
     var map = L.map('map').setView([lat, lon], 10);
         map.setMaxBounds(map.getBounds()); 
         
@@ -6,34 +8,34 @@ function manageMap(lat, lon) {
         maxZoom: 15,
         minZoom: 9,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        
+
         }),
-        Temp = L.tileLayer('https://qweatherapp.herokuapp.com/map/tile_name=temp_new/z={z}/x={x}/y={y}', {
+        Temp = L.tileLayer(url+'map/tile_name=temp_new/z={z}/x={x}/y={y}', {
             maxZoom: 15,
             minZoom: 9,
             attribution: '&copy; <a href="http://owm.io">VANE</a>',
         }),
 
-        Precipitation = L.tileLayer('https://qweatherapp.herokuapp.com/map/tile_name=precipitation_new/z={z}/x={x}/y={y}', {
+        Precipitation = L.tileLayer(url+'map/tile_name=precipitation_new/z={z}/x={x}/y={y}', {
             maxZoom: 15,
             minZoom: 9,
             attribution: '&copy; <a href="http://owm.io">VANE</a>'
         }),
 
-        Wind = L.tileLayer('https://qweatherapp.herokuapp.com/map/tile_name=wind_new/z={z}/x={x}/y={y}', {
+        Wind = L.tileLayer(url+'map/tile_name=wind_new/z={z}/x={x}/y={y}', {
             maxZoom: 15,
             minZoom: 9,
             attribution: '&copy; <a href="http://owm.io">VANE</a>'
         }),
 
-        Pressure = L.tileLayer('https://qweatherapp.herokuapp.com/map/tile_name=pressure_new/z={z}/x={x}/y={y}', {
+        Pressure = L.tileLayer(url+'map/tile_name=pressure_new/z={z}/x={x}/y={y}', {
             maxZoom: 15,
             minZoom: 9,
             attribution: '&copy; <a href="http://owm.io">VANE</a>'
         }),
 
 
-        Clouds = L.tileLayer('https://qweatherapp.herokuapp.com/map/tile_name=clouds_new/z={z}/x={x}/y={y}', {
+        Clouds = L.tileLayer(url+'map/tile_name=clouds_new/z={z}/x={x}/y={y}', {
             maxZoom: 15,
             minZoom: 9,
             attribution: '&copy; <a href="http://owm.io">VANE</a>'
