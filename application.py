@@ -41,20 +41,19 @@ if not app_key:
     raise RuntimeError("OWM map key error")
 
 application = Flask(__name__)
-app = application
-app.config["TEMPLATES_AUTO_RELOAD"] = True
-app.secret_key = secret_key
-bcrypt = Bcrypt(app)
+application.config["TEMPLATES_AUTO_RELOAD"] = True
+application.secret_key = secret_key
+bcrypt = Bcrypt(application)
 
 
-limiter = Limiter(app, key_func=get_remote_address)
+limiter = Limiter(application, key_func=get_remote_address)
 
-@app.errorhandler(429)
+@application.errorhandler(429)
 def ratelimit_handler(e):
     return make_response(jsonify(error="ratelimit exceeded code 429, %s" % e.description), 429)
 
 
-@app.route('/', methods=["GET", "POST"])
+@application.route('/', methods=["GET", "POST"])
 @limiter.limit("500 per minute")
 def index():
     print(f"test1{temp_storage}")
@@ -81,7 +80,7 @@ def index():
         return render_template("index.html")
 
 
-@app.route('/weather/<place>', methods=["GET", "POST"])
+@application.route('/weather/<place>', methods=["GET", "POST"])
 @limiter.limit("500 per minute")
 def weather(place):
     print(f"test1{temp_storage}")
@@ -112,7 +111,7 @@ def weather(place):
         return redirect("/")
 
 
-@app.route("/register/<place>", methods=["GET", "POST"])
+@application.route("/register/<place>", methods=["GET", "POST"])
 @limiter.limit("60 per houre")
 def register(place):
     try:
@@ -142,7 +141,7 @@ def register(place):
         return render_template("register.html", place=place)
 
 
-@app.route("/login/<place>", methods=["GET", "POST"])
+@application.route("/login/<place>", methods=["GET", "POST"])
 @limiter.limit("60 per minute")
 def login(place):
     try:
@@ -178,7 +177,7 @@ def login(place):
 
 
 @login_required
-@app.route("/logout", methods=["GET"])
+@application.route("/logout", methods=["GET"])
 def logout():
     Quick_search.clear_buffer()
     user_id = session["user_id"]
@@ -188,7 +187,7 @@ def logout():
 
 
 @login_required
-@app.route("/delete/<place>", methods=["GET", "POST"])
+@application.route("/delete/<place>", methods=["GET", "POST"])
 @limiter.limit("30 per minute")
 def delete(place):
     try:
@@ -217,7 +216,7 @@ def delete(place):
 
 
 @login_required
-@app.route("/change_password/<place>", methods=["GET", "POST"])
+@application.route("/change_password/<place>", methods=["GET", "POST"])
 @limiter.limit("30 per minute")
 def change_password(place):
     try:
@@ -244,7 +243,7 @@ def change_password(place):
     return render_template("change_password.html", place=place)
 
 
-@app.route("/restore_password/<place>", methods=["GET", "POST"])
+@application.route("/restore_password/<place>", methods=["GET", "POST"])
 @limiter.limit("20 per minute")
 def restore_password(place):
     try:
@@ -272,7 +271,7 @@ def restore_password(place):
     return render_template("restore_password.html", place=place)
 
 
-@app.route("/send_temporary_password/<place>", methods=["GET", "POST"])
+@application.route("/send_temporary_password/<place>", methods=["GET", "POST"])
 def send_temporary_password(place):
     try:
         place = str(place).capitalize()
@@ -303,7 +302,7 @@ def send_temporary_password(place):
 
 
 @login_required
-@app.route("/track/<place>", methods=["POST"])
+@application.route("/track/<place>", methods=["POST"])
 @limiter.limit("50 per minute")
 def track(place):
     try:
@@ -335,7 +334,7 @@ def track(place):
 
 
 @login_required
-@app.route("/stop_track", methods=["POST"])
+@application.route("/stop_track", methods=["POST"])
 def stop_track():
     if request.method == "POST":
         search_result = Quick_search.query_quick_search()
@@ -355,7 +354,7 @@ def stop_track():
     return redirect("/")
 
 
-@app.route("/map/<tile_name>/<z>/<x>/<y>")
+@application.route("/map/<tile_name>/<z>/<x>/<y>")
 @limiter.limit("300 per minute")
 def get_tile(tile_name,z,x,y):
     try:
@@ -464,4 +463,4 @@ def compass(direction):
     
         
 if __name__=="__main__":
-    app.run()    
+    application.run()    
